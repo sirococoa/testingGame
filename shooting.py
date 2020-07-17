@@ -22,13 +22,17 @@ class Player:
     V = 4
     width = 14
     height = 12
+    speed = 2
 
     def __init__(self, x, y):
         self.x = x
         self.y = y
 
     def update(self):
-        pass
+        if pyxel.btn(pyxel.KEY_LEFT) or pyxel.btn(pyxel.KEY_A):
+            self.x = max(0 + Player.width//2, self.x - Player.speed)
+        if pyxel.btn(pyxel.KEY_RIGHT) or pyxel.btn(pyxel.KEY_D):
+            self.x = min(WINDOW_WIDTH - Player.width//2, self.x + Player.speed)
 
     def draw(self):
         pyxel.blt(self.x - Player.width//2, self.y - Player.height//2, 0, Player.U, Player.V, Player.width, Player.height, colkey=0)
