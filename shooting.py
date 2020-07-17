@@ -39,5 +39,17 @@ class Player:
         pyxel.blt(self.x - Player.width//2, self.y - Player.height//2, 0, Player.U, Player.V, Player.width, Player.height, colkey=0)
 
 
+class Bullet:
+    def __init__(self, x, y):
+        self.x = x
+        self.y = y
+
+    def update(self):
+        pass
+
+    def draw(self):
+        pass
+
+
 if __name__ == '__main__':
     Shooting()
