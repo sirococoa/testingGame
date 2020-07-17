@@ -16,6 +16,11 @@ class Shooting:
         pass
 
 class Player:
+    U = 1
+    V = 4
+    width = 14
+    height = 12
+
     def __init__(self, x, y):
         self.x = x
         self.y = y
@@ -24,4 +29,4 @@ class Player:
         pass
 
     def draw(self):
-        pass
+        pyxel.blt(self.x - Player.width//2, self.y - Player.height//2, 0, Player.U, Player.V, Player.width, Player.height, colkey=0)
