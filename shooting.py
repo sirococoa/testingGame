@@ -44,13 +44,17 @@ class Bullet:
     V = 3
     width = 4
     height = 10
+    speed = 4
 
     def __init__(self, x, y):
         self.x = x
         self.y = y
+        self.active = True
 
     def update(self):
-        pass
+        self.y -= Bullet.speed
+        if self.y < Bullet.height:
+            self.active = False
 
     def draw(self):
         pyxel.blt(self.x - Bullet.width//2, self.y - Bullet.height//2, 0, Bullet.U, Bullet.V, Bullet.width, Bullet.height, colkey=0)
