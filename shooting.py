@@ -15,6 +15,7 @@ class Shooting:
         self.player.update()
 
     def draw(self):
+        pyxel.cls(0)
         self.player.draw()
 
 class Player:
