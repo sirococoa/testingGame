@@ -7,13 +7,15 @@ WINDOW_HEIGHT = 160
 class Shooting:
     def __init__(self):
         pyxel.init(WINDOW_WIDTH, WINDOW_HEIGHT)
+        pyxel.load('shooting.pyxres')
+        self.player = Player(WINDOW_WIDTH//2, int(WINDOW_HEIGHT*0.8))
         pyxel.run(self.update, self.draw)
 
     def update(self):
-        pass
+        self.player.update()
 
     def draw(self):
-        pass
+        self.player.draw()
 
 class Player:
     U = 1
@@ -30,3 +32,7 @@ class Player:
 
     def draw(self):
         pyxel.blt(self.x - Player.width//2, self.y - Player.height//2, 0, Player.U, Player.V, Player.width, Player.height, colkey=0)
+
+
+if __name__ == '__main__':
+    Shooting()
