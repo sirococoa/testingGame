@@ -31,18 +31,24 @@ class Player:
     width = 14
     height = 12
     speed = 2
+    rate = 5
 
     def __init__(self, x, y):
         self.x = x
         self.y = y
+        self.cool_time = 0
 
     def update(self):
         if pyxel.btn(pyxel.KEY_LEFT) or pyxel.btn(pyxel.KEY_A):
             self.x = max(0 + Player.width//2, self.x - Player.speed)
         if pyxel.btn(pyxel.KEY_RIGHT) or pyxel.btn(pyxel.KEY_D):
             self.x = min(WINDOW_WIDTH - Player.width//2, self.x + Player.speed)
-        if pyxel.btn(pyxel.KEY_SPACE):
-            Shooting.bullets.append(Bullet(self.x, self.y))
+        if self.cool_time:
+            self.cool_time -= 1
+        else:
+            if pyxel.btn(pyxel.KEY_SPACE):
+                Shooting.bullets.append(Bullet(self.x, self.y))
+                self.cool_time = Player.rate
 
     def draw(self):
         pyxel.blt(self.x - Player.width//2, self.y - Player.height//2, 0, Player.U, Player.V, Player.width, Player.height, colkey=0)
