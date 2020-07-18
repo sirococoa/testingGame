@@ -1,3 +1,5 @@
+from random import randint
+
 import pyxel
 
 WINDOW_WIDTH = 80
@@ -80,6 +82,7 @@ class Asteroid:
     V = 3
     width = 10
     height = 10
+    speed_range = [1, 3]
 
     def __init__(self, x, y, speed):
         self.x = x
@@ -95,6 +98,12 @@ class Asteroid:
     def draw(self):
         pyxel.blt(self.x - Asteroid.width//2, self.y - Asteroid.height//2, 0, Asteroid.U, Asteroid.V, Asteroid.width, Asteroid.height, colkey=0)
 
+    @classmethod
+    def generate(cls):
+        x = randint(Asteroid.width//2, WINDOW_WIDTH - Asteroid.width//2)
+        y = -Asteroid.height
+        speed = randint(*Asteroid.speed_range)
+        return Asteroid(x, y, speed)
 
 if __name__ == '__main__':
     Shooting()
