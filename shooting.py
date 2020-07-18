@@ -1,4 +1,4 @@
-from random import randint
+from random import randint, random
 
 import pyxel
 
@@ -8,11 +8,15 @@ WINDOW_HEIGHT = 160
 
 class Shooting:
     bullets = []
+    asteroids = []
+    MAX_ASTEROIDS_NUM = 10
+    INIT_ASTEROIDS_RATE = 0.1
 
     def __init__(self):
         pyxel.init(WINDOW_WIDTH, WINDOW_HEIGHT)
         pyxel.load('shooting.pyxres')
         self.player = Player(WINDOW_WIDTH//2, int(WINDOW_HEIGHT*0.8))
+        self.asteroid_rate = Shooting.INIT_ASTEROIDS_RATE
         pyxel.run(self.update, self.draw)
 
     def update(self):
@@ -20,12 +24,20 @@ class Shooting:
         for bullet in Shooting.bullets:
             bullet.update()
         Shooting.bullets = [bullet for bullet in Shooting.bullets if bullet.active]
+        for asteroid in Shooting.asteroids:
+            asteroid.update()
+        Shooting.asteroids = [asteroid for asteroid in Shooting.asteroids if asteroid.active]
+        if len(Shooting.asteroids) < Shooting.MAX_ASTEROIDS_NUM:
+            if random() < self.asteroid_rate:
+                Shooting.asteroids.append(Asteroid.generate())
 
     def draw(self):
         pyxel.cls(0)
         self.player.draw()
         for bullet in Shooting.bullets:
             bullet.draw()
+        for asteroid in Shooting.asteroids:
+            asteroid.draw()
 
 
 class Player:
