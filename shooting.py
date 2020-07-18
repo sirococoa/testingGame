@@ -76,6 +76,11 @@ class Bullet:
 
 
 class Asteroid:
+    U = 35
+    V = 3
+    width = 10
+    height = 10
+
     def __init__(self, x, y, speed):
         self.x = x
         self.y = y
@@ -85,7 +90,7 @@ class Asteroid:
         pass
 
     def draw(self):
-        pass
+        pyxel.blt(self.x - Asteroid.width//2, self.y - Asteroid.height//2, 0, Asteroid.U, Asteroid.V, Asteroid.width, Asteroid.height, colkey=0)
 
 
 if __name__ == '__main__':
