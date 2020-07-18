@@ -5,6 +5,8 @@ WINDOW_HEIGHT = 160
 
 
 class Shooting:
+    bullets = []
+
     def __init__(self):
         pyxel.init(WINDOW_WIDTH, WINDOW_HEIGHT)
         pyxel.load('shooting.pyxres')
@@ -13,10 +15,15 @@ class Shooting:
 
     def update(self):
         self.player.update()
+        for bullet in Shooting.bullets:
+            bullet.update()
+        Shooting.bullets = [bullet for bullet in Shooting.bullets if bullet.active]
 
     def draw(self):
         pyxel.cls(0)
         self.player.draw()
+        for bullet in Shooting.bullets:
+            bullet.draw()
 
 class Player:
     U = 1
@@ -34,6 +41,8 @@ class Player:
             self.x = max(0 + Player.width//2, self.x - Player.speed)
         if pyxel.btn(pyxel.KEY_RIGHT) or pyxel.btn(pyxel.KEY_D):
             self.x = min(WINDOW_WIDTH - Player.width//2, self.x + Player.speed)
+        if pyxel.btn(pyxel.KEY_SPACE):
+            Shooting.bullets.append(Bullet(self.x, self.y))
 
     def draw(self):
         pyxel.blt(self.x - Player.width//2, self.y - Player.height//2, 0, Player.U, Player.V, Player.width, Player.height, colkey=0)
