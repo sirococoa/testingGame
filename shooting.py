@@ -47,11 +47,13 @@ class Player:
     height = 12
     speed = 2
     rate = 5
+    INIT_HP = 3
 
     def __init__(self, x, y):
         self.x = x
         self.y = y
         self.cool_time = 0
+        self.hp = Player.INIT_HP
 
     def update(self):
         if pyxel.btn(pyxel.KEY_LEFT) or pyxel.btn(pyxel.KEY_A):
@@ -64,6 +66,12 @@ class Player:
             if pyxel.btn(pyxel.KEY_SPACE):
                 Shooting.bullets.append(Bullet(self.x, self.y))
                 self.cool_time = Player.rate
+
+        for asteroid in Shooting.asteroids:
+            if abs(self.x - asteroid.x) <= Player.width//2 + Asteroid.width//2 and abs(self.y - asteroid.y) <= Player.height//2 + Asteroid.height//2:
+                asteroid.active = False
+                self.hp -= 1
+        print(self.hp)
 
     def draw(self):
         pyxel.blt(self.x - Player.width//2, self.y - Player.height//2, 0, Player.U, Player.V, Player.width, Player.height, colkey=0)
