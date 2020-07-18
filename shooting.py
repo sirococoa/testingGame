@@ -85,6 +85,11 @@ class Bullet:
         self.y -= Bullet.speed
         if self.y < -Bullet.height:
             self.active = False
+        for asteroid in Shooting.asteroids:
+            if abs(self.x - asteroid.x) <= Bullet.width//2 + Asteroid.width//2 and abs(self.y - asteroid.y) <= Bullet.height//2 + Asteroid.height//2:
+                asteroid.active = False
+                self.active = False
+                return
 
     def draw(self):
         pyxel.blt(self.x - Bullet.width//2, self.y - Bullet.height//2, 0, Bullet.U, Bullet.V, Bullet.width, Bullet.height, colkey=0)
