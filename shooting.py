@@ -27,6 +27,7 @@ class Shooting:
         for bullet in Shooting.bullets:
             bullet.draw()
 
+
 class Player:
     U = 1
     V = 4
@@ -104,6 +105,7 @@ class Asteroid:
         y = -Asteroid.height
         speed = randint(*Asteroid.speed_range)
         return Asteroid(x, y, speed)
+
 
 if __name__ == '__main__':
     Shooting()
