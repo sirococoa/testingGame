@@ -85,9 +85,12 @@ class Asteroid:
         self.x = x
         self.y = y
         self.speed = speed
+        self.active = True
 
     def update(self):
-        pass
+        self.y += self.speed
+        if self.y > WINDOW_HEIGHT + Asteroid.height:
+            self.active = False
 
     def draw(self):
         pyxel.blt(self.x - Asteroid.width//2, self.y - Asteroid.height//2, 0, Asteroid.U, Asteroid.V, Asteroid.width, Asteroid.height, colkey=0)
