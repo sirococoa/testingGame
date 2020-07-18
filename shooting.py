@@ -68,7 +68,7 @@ class Bullet:
 
     def update(self):
         self.y -= Bullet.speed
-        if self.y < Bullet.height:
+        if self.y < -Bullet.height:
             self.active = False
 
     def draw(self):
