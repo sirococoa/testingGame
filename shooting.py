@@ -71,7 +71,6 @@ class Player:
             if abs(self.x - asteroid.x) <= Player.width//2 + Asteroid.width//2 and abs(self.y - asteroid.y) <= Player.height//2 + Asteroid.height//2:
                 asteroid.active = False
                 self.hp -= 1
-        print(self.hp)
 
     def draw(self):
         pyxel.blt(self.x - Player.width//2, self.y - Player.height//2, 0, Player.U, Player.V, Player.width, Player.height, colkey=0)
