@@ -75,5 +75,17 @@ class Bullet:
         pyxel.blt(self.x - Bullet.width//2, self.y - Bullet.height//2, 0, Bullet.U, Bullet.V, Bullet.width, Bullet.height, colkey=0)
 
 
+class Asteroid:
+    def __init__(self, x, y, speed):
+        self.x = x
+        self.y = y
+
+    def update(self):
+        pass
+
+    def draw(self):
+        pass
+
+
 if __name__ == '__main__':
     Shooting()
