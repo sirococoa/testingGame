@@ -12,6 +12,7 @@ class Shooting:
     asteroids = []
     MAX_ASTEROIDS_NUM = 10
     INIT_ASTEROIDS_RATE = 0.1
+    CLEAR_TIME = 30*60
 
     def __init__(self):
         pyxel.init(WINDOW_WIDTH, WINDOW_HEIGHT)
@@ -19,10 +20,13 @@ class Shooting:
         self.player = Player(WINDOW_WIDTH//2, int(WINDOW_HEIGHT*0.8))
         self.asteroid_rate = Shooting.INIT_ASTEROIDS_RATE
         self.gameover = None
+        self.step = 0
         pyxel.run(self.update, self.draw)
 
     def update(self):
-        if self.player.hp >= 0:
+        if not self.gameover:
+            self.step += 1
+
             self.player.update()
             for bullet in Shooting.bullets:
                 bullet.update()
@@ -34,7 +38,9 @@ class Shooting:
                 if random() < self.asteroid_rate:
                     Shooting.asteroids.append(Asteroid.generate())
             if self.player.hp < 0:
-                self.gameover = GameOver(0, False)
+                self.gameover = GameOver(self.step, False)
+            if self.step == Shooting.CLEAR_TIME:
+                self.gameover = GameOver(self.step, True)
         else:
             self.gameover.update()
 
