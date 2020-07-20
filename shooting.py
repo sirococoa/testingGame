@@ -133,14 +133,22 @@ class Asteroid:
 
 
 class GameOver:
-    def __init__(self):
-        pass
+    def __init__(self, score, clear=False):
+        self.score = score
+        self.clear = clear
 
     def update(self):
         pass
 
     def draw(self):
-        pass
+        if self.clear:
+            message = "Game Clear"
+        else:
+            message = "Game Over"
+        pyxel.text(pt.center(message, WINDOW_WIDTH), WINDOW_HEIGHT//2, message)
+
+        message = "Your Score : {}".format(str(self.score))
+        pyxel.text(pt.center(message, WINDOW_WIDTH), WINDOW_HEIGHT//4, message)
 
 
 if __name__ == '__main__':
