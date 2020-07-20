@@ -46,7 +46,7 @@ class Shooting:
 
     def draw(self):
         pyxel.cls(0)
-        if self.player.hp >= 0:
+        if not self.gameover:
             self.player.draw()
             for bullet in Shooting.bullets:
                 bullet.draw()
