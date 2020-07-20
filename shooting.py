@@ -41,6 +41,7 @@ class Shooting:
                 self.gameover = GameOver(self.step, False)
             if self.step == Shooting.CLEAR_TIME:
                 self.gameover = GameOver(self.step, True)
+            pt.ParticleSystem.update()
         else:
             self.gameover.update()
 
@@ -53,6 +54,7 @@ class Shooting:
             for asteroid in Shooting.asteroids:
                 asteroid.draw()
             draw_stock(self.player.hp)
+            pt.ParticleSystem.draw()
         else:
             self.gameover.draw()
 
@@ -139,6 +141,9 @@ class Asteroid:
 
     def draw(self):
         pyxel.blt(self.x - Asteroid.width//2, self.y - Asteroid.height//2, 0, Asteroid.U, Asteroid.V, Asteroid.width, Asteroid.height, colkey=0)
+
+    def destroy(self):
+        pt.ParticleSystem.particles.append(pt.ParticleSystem.Particle())
 
     @classmethod
     def generate(cls):

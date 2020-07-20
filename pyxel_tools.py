@@ -42,21 +42,24 @@ class ParticleSystem:
             p.draw()
 
     class Particle:
-        def __init__(self, x, y, u, v, w, h, time, colkey=None):
+        def __init__(self, x, y, u, v, w, h, time, flame=1, colkey=None):
             self.x = x
             self.y = y
             self.u = u
             self.v = v
             self.w = w
             self.h = h
+            self.max_time = self.time
             self.time = time
+            self.flame = flame
             self.colkey = colkey
 
         def update(self):
             self.time -= 1
 
         def draw(self):
+            current_flame = int((self.max_time - self.time)/self.max_time*self.flame)
             if self.colkey:
-                pyxel.blt(self.x - self.w/2, self.y - self.h/2, 0, self.u, self.v, self.w, self.h, self.colkey)
+                pyxel.blt(self.x - self.w/2, self.y - self.h/2, 0, self.u + current_flame*self.w, self.v, self.w, self.h, self.colkey)
             else:
-                pyxel.blt(self.x - self.w/2, self.y - self.h/2, 0, self.u, self.v, self.w, self.h)
+                pyxel.blt(self.x - self.w/2, self.y - self.h/2, 0, self.u + current_flame*self.w, self.v, self.w, self.h)
