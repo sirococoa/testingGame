@@ -1,6 +1,7 @@
 from random import randint, random
 
 import pyxel
+import pyxel_tools as pt
 
 WINDOW_WIDTH = 80
 WINDOW_HEIGHT = 160
