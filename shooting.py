@@ -160,5 +160,16 @@ class GameOver:
         pyxel.text(pt.center(message, WINDOW_WIDTH), WINDOW_HEIGHT//4*3, message, 7)
 
 
+def draw_stock(num):
+    stock_height = int(WINDOW_HEIGHT*0.9)
+    u = 5
+    v = 21
+    w = 6
+    h = 6
+    interval = 2
+    for i in range(num):
+        pyxel.blt(i*(w + interval) + interval, stock_height, 0, u, v, w, h, colkey=0)
+
+
 if __name__ == '__main__':
     Shooting()
