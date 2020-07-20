@@ -157,7 +157,7 @@ class GameOver:
         pyxel.text(pt.center(message, WINDOW_WIDTH), WINDOW_HEIGHT//2, message, 7)
 
         message = "Your Score : {}".format(str(self.score))
-        pyxel.text(pt.center(message, WINDOW_WIDTH), WINDOW_HEIGHT//4, message, 7)
+        pyxel.text(pt.center(message, WINDOW_WIDTH), WINDOW_HEIGHT//4*3, message, 7)
 
 
 if __name__ == '__main__':
