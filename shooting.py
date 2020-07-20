@@ -154,10 +154,10 @@ class GameOver:
             message = "Game Clear"
         else:
             message = "Game Over"
-        pyxel.text(pt.center(message, WINDOW_WIDTH), WINDOW_HEIGHT//2, message)
+        pyxel.text(pt.center(message, WINDOW_WIDTH), WINDOW_HEIGHT//2, message, 7)
 
         message = "Your Score : {}".format(str(self.score))
-        pyxel.text(pt.center(message, WINDOW_WIDTH), WINDOW_HEIGHT//4, message)
+        pyxel.text(pt.center(message, WINDOW_WIDTH), WINDOW_HEIGHT//4, message, 7)
 
 
 if __name__ == '__main__':
