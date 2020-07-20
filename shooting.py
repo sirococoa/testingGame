@@ -46,6 +46,7 @@ class Shooting:
                 bullet.draw()
             for asteroid in Shooting.asteroids:
                 asteroid.draw()
+            draw_stock(self.player.hp)
         else:
             self.gameover.draw()
 
