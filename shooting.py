@@ -18,27 +18,36 @@ class Shooting:
         pyxel.load('shooting.pyxres')
         self.player = Player(WINDOW_WIDTH//2, int(WINDOW_HEIGHT*0.8))
         self.asteroid_rate = Shooting.INIT_ASTEROIDS_RATE
+        self.gameover = None
         pyxel.run(self.update, self.draw)
 
     def update(self):
-        self.player.update()
-        for bullet in Shooting.bullets:
-            bullet.update()
-        Shooting.bullets = [bullet for bullet in Shooting.bullets if bullet.active]
-        for asteroid in Shooting.asteroids:
-            asteroid.update()
-        Shooting.asteroids = [asteroid for asteroid in Shooting.asteroids if asteroid.active]
-        if len(Shooting.asteroids) < Shooting.MAX_ASTEROIDS_NUM:
-            if random() < self.asteroid_rate:
-                Shooting.asteroids.append(Asteroid.generate())
+        if self.player.hp >= 0:
+            self.player.update()
+            for bullet in Shooting.bullets:
+                bullet.update()
+            Shooting.bullets = [bullet for bullet in Shooting.bullets if bullet.active]
+            for asteroid in Shooting.asteroids:
+                asteroid.update()
+            Shooting.asteroids = [asteroid for asteroid in Shooting.asteroids if asteroid.active]
+            if len(Shooting.asteroids) < Shooting.MAX_ASTEROIDS_NUM:
+                if random() < self.asteroid_rate:
+                    Shooting.asteroids.append(Asteroid.generate())
+            if self.player.hp < 0:
+                self.gameover = GameOver(0, False)
+        else:
+            self.gameover.update()
 
     def draw(self):
         pyxel.cls(0)
-        self.player.draw()
-        for bullet in Shooting.bullets:
-            bullet.draw()
-        for asteroid in Shooting.asteroids:
-            asteroid.draw()
+        if self.player.hp >= 0:
+            self.player.draw()
+            for bullet in Shooting.bullets:
+                bullet.draw()
+            for asteroid in Shooting.asteroids:
+                asteroid.draw()
+        else:
+            self.gameover.draw()
 
 
 class Player:
