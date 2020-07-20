@@ -131,5 +131,16 @@ class Asteroid:
         return Asteroid(x, y, speed)
 
 
+class GameOver:
+    def __init__(self):
+        pass
+
+    def update(self):
+        pass
+
+    def draw(self):
+        pass
+
+
 if __name__ == '__main__':
     Shooting()
