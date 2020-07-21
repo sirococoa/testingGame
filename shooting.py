@@ -21,6 +21,7 @@ class Shooting:
         self.asteroid_rate = Shooting.INIT_ASTEROIDS_RATE
         self.gameover = None
         self.step = 0
+        Shooting.collector = DataCollector()
         pyxel.run(self.update, self.draw)
 
     def update(self):
@@ -39,9 +40,12 @@ class Shooting:
                     Shooting.asteroids.append(Asteroid.generate())
             if self.player.hp < 0:
                 self.gameover = GameOver(self.step, False)
+                Shooting.collector.clear(self.step)
             if self.step == Shooting.CLEAR_TIME:
                 self.gameover = GameOver(self.step, True)
+                Shooting.collector.clear(self.step)
             pt.ParticleSystem.update()
+            Shooting.collector.update()
         else:
             self.gameover.update()
 
@@ -151,6 +155,7 @@ class Asteroid:
         flame = 3
         time = 10
         pt.ParticleSystem.generate(self.x, self.y, u, v, w, h, time, flame, 0)
+        Shooting.collector.destroy_asteroid()
 
     @classmethod
     def generate(cls):
@@ -208,6 +213,7 @@ class DataCollector:
 
     def clear(self, step):
         self.clear_step_num = step
+        self.output()
 
     def output(self):
         with open('shooting_log.txt', 'w') as f:
