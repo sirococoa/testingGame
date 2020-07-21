@@ -179,6 +179,15 @@ class GameOver:
         pyxel.text(pt.center(message, WINDOW_WIDTH), WINDOW_HEIGHT//4*3, message, 7)
 
 
+class DataCollector:
+    def __init__(self):
+        pass
+
+    def update(self):
+        pass
+
+
+
 def draw_stock(num):
     u = 5
     v = 21
