@@ -53,7 +53,7 @@ class ParticleSystem:
             self.v = v
             self.w = w
             self.h = h
-            self.max_time = self.time
+            self.max_time = time
             self.time = time
             self.flame = flame
             self.colkey = colkey
