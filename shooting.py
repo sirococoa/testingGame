@@ -114,6 +114,7 @@ class Bullet:
         for asteroid in Shooting.asteroids:
             if abs(self.x - asteroid.x) <= Bullet.width//2 + Asteroid.width//2 and abs(self.y - asteroid.y) <= Bullet.height//2 + Asteroid.height//2:
                 asteroid.active = False
+                asteroid.destroy()
                 self.active = False
                 return
 
@@ -148,7 +149,8 @@ class Asteroid:
         w = 16
         h = 16
         flame = 3
-        pt.ParticleSystem.generate(self.x, self.y, u, v, w, h, flame, 0)
+        time = 10
+        pt.ParticleSystem.generate(self.x, self.y, u, v, w, h, time, flame, 0)
 
     @classmethod
     def generate(cls):
