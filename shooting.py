@@ -181,11 +181,33 @@ class GameOver:
 
 class DataCollector:
     def __init__(self):
-        pass
+        self.left_input_num = 0
+        self.right_input_num = 0
+        self.attack_input_num = 0
+        self.change_direction_num = 0   # left:0, right:1
+        self.destroy_asteroid_num = 0
+
+        self.direction = 0
 
     def update(self):
-        pass
+        if pyxel.btn(pyxel.KEY_LEFT) or pyxel.btn(pyxel.KEY_A):
+            if self.direction == 1:
+                self.direction = 0
+                self.change_direction_num += 1
+            self.left_input_num += 1
+        if pyxel.btn(pyxel.KEY_RIGHT) or pyxel.btn(pyxel.KEY_D):
+            if self.direction == 0:
+                self.direction = 1
+                self.change_direction_num += 1
+            self.right_input_num += 1
+        if pyxel.btn(pyxel.KEY_SPACE):
+            self.attack_input_num += 1
 
+    def destroy_asteroid(self):
+        self.destroy_asteroid_num += 1
+
+    def clear(self, step):
+        self.clear_step_num = step
 
 
 def draw_stock(num):
