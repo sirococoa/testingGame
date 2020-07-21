@@ -209,6 +209,15 @@ class DataCollector:
     def clear(self, step):
         self.clear_step_num = step
 
+    def output(self):
+        with open('shooting_log.txt', 'w') as f:
+            f.write(str(self.left_input_num))
+            f.write(str(self.right_input_num))
+            f.write(str(self.attack_input_num))
+            f.write(str(self.change_direction_num))
+            f.write(str(self.destroy_asteroid_num))
+            f.write(str(self.clear_step_num))
+
 
 def draw_stock(num):
     u = 5
