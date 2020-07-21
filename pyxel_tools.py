@@ -63,7 +63,7 @@ class ParticleSystem:
 
         def draw(self):
             current_flame = int((self.max_time - self.time)/self.max_time*self.flame)
-            if self.colkey:
+            if self.colkey is not None:
                 pyxel.blt(self.x - self.w/2, self.y - self.h/2, 0, self.u + current_flame*self.w, self.v, self.w, self.h, self.colkey)
             else:
                 pyxel.blt(self.x - self.w/2, self.y - self.h/2, 0, self.u + current_flame*self.w, self.v, self.w, self.h)
