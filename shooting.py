@@ -148,7 +148,7 @@ class Asteroid:
         w = 16
         h = 16
         flame = 3
-        pt.ParticleSystem.generate(x, y, u, v, w, h, flame, 0)
+        pt.ParticleSystem.generate(self.x, self.y, u, v, w, h, flame, 0)
 
     @classmethod
     def generate(cls):
