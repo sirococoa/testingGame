@@ -41,6 +41,10 @@ class ParticleSystem:
         for p in ParticleSystem.particles:
             p.draw()
 
+    @classmethod
+    def generate(cls, x, y, u, v, w, h, time, flame=1, colkey=None):
+        ParticleSystem.particles.append(ParticleSystem.Particle(x, y, u, v, w, h, time, flame, colkey))
+
     class Particle:
         def __init__(self, x, y, u, v, w, h, time, flame=1, colkey=None):
             self.x = x
