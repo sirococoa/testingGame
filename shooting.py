@@ -143,7 +143,12 @@ class Asteroid:
         pyxel.blt(self.x - Asteroid.width//2, self.y - Asteroid.height//2, 0, Asteroid.U, Asteroid.V, Asteroid.width, Asteroid.height, colkey=0)
 
     def destroy(self):
-        pt.ParticleSystem.particles.append(pt.ParticleSystem.Particle())
+        u = 48
+        v = 0
+        w = 16
+        h = 16
+        flame = 3
+        pt.ParticleSystem.generate(x, y, u, v, w, h, flame, 0)
 
     @classmethod
     def generate(cls):
