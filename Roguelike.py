@@ -13,6 +13,13 @@ class RogueLike:
 
 
 class Stage:
+    class Room:
+        def __init__(self):
+            pass
+
+        def collision(self, other):
+            pass
+
     def __init__(self, width, height, max_room_num):
         self.width = width
         self.height = height
