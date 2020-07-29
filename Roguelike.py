@@ -1,3 +1,5 @@
+from random import randrange
+
 import pyxel
 
 
@@ -14,8 +16,14 @@ class RogueLike:
 
 class Stage:
     class Room:
-        def __init__(self):
-            pass
+        def __init__(self, width, height, min_size, max_size):
+            while True:
+                self.x = randrange(0, width)
+                self.y = randrange(0, height)
+                self.w = randrange(min_size, max_size)
+                self.h = randrange(min_size, max_size)
+                if self.x + self.w <= width and self.y + self.h <= height:
+                    break
 
         def collision(self, other):
             pass
