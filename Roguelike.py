@@ -1,4 +1,5 @@
 from random import randrange
+from itertools import combinations
 
 import pyxel
 
@@ -24,6 +25,7 @@ class Stage:
                 self.h = randrange(min_size, max_size)
                 if self.x + self.w <= width and self.y + self.h <= height:
                     break
+            self.coll = False
 
         def collision(self, other):
             if -self.w <= self.x - other.x <= other.w:
@@ -43,14 +45,21 @@ class Stage:
                 buffer += self.y - (other.y + other.h)
             return buffer
 
-    def __init__(self, width, height, max_room_num):
+    def __init__(self, width, height, max_room_num, min_room_size, max_room_size):
         self.width = width
         self.height = height
         self.max_room_num = max_room_num
+        self.min_room_size = min_room_size
+        self.max_room_size = max_room_size
         self.make_stage()
 
     def make_stage(self):
-        pass
+        self.room_list = [Stage.Room(self.width, self.height, self.min_room_size, self.max_room_size) for _ in range(self.max_room_num)]
+        for a, b in combinations(self.room_list, 2)
+            if a.collision(b):
+                a.coll = True
+                b.coll = True
+        self.room_list = [room for room in self.room_list if not room.coll]
 
     def draw(self):
         pass
