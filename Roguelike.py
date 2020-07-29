@@ -26,7 +26,10 @@ class Stage:
                     break
 
         def collision(self, other):
-            pass
+            if -self.w <= self.x - other.x <= other.w:
+                if -self.h <= self.y - other.y <= other.h:
+                    return True
+            return False
 
     def __init__(self, width, height, max_room_num):
         self.width = width
