@@ -31,6 +31,18 @@ class Stage:
                     return True
             return False
 
+        def length(self, other):
+            buffer = 0
+            if self.x < other.x:
+                buffer += other.x - (self.x + self.w)
+            else:
+                buffer += self.x - (other.x + other.w)
+            if self.y < other.y:
+                buffer += other.y - (self.y + self.h)
+            else:
+                buffer += self.y - (other.y + other.h)
+            return buffer
+
     def __init__(self, width, height, max_room_num):
         self.width = width
         self.height = height
