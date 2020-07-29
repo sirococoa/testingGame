@@ -13,9 +13,10 @@ class RogueLike:
 
 
 class Stage:
-    def __init__(self, width, height):
+    def __init__(self, width, height, max_room_num):
         self.width = width
         self.height = height
+        self.max_room_num = max_room_num
         self.make_stage()
 
     def make_stage(self):
