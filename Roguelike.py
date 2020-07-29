@@ -60,6 +60,12 @@ class Stage:
                 b.coll = True
         self.room_list = [room for room in self.room_list if not room.coll]
 
+        self.data = [[1 for _ in range(self.width)] for _ in range(self.height)]
+        for room in self.room_list:
+            for x in range(room.x + 1, room.x + room.w):
+                for y in range(room.y + 1, room.y + room.h):
+                    self.data[x][y] = 0
+
     def draw(self):
         pass
 
