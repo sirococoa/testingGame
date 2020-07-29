@@ -55,9 +55,8 @@ class Stage:
 
     def make_stage(self):
         self.room_list = [Stage.Room(self.width, self.height, self.min_room_size, self.max_room_size) for _ in range(self.max_room_num)]
-        for a, b in combinations(self.room_list, 2)
+        for a, b in combinations(self.room_list, 2):
             if a.collision(b):
-                a.coll = True
                 b.coll = True
         self.room_list = [room for room in self.room_list if not room.coll]
 
