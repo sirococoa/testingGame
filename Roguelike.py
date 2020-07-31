@@ -1,5 +1,5 @@
-from random import randrange
-from itertools import combinations
+from random import randrange, random
+from itertools import combinations, chain
 
 import pyxel
 
@@ -16,6 +16,9 @@ class RogueLike:
 
 
 class Stage:
+    rooms = []
+    aisles = []
+
     class Room:
         def __init__(self, width, height, min_size, max_size):
             while True:
@@ -47,7 +50,37 @@ class Stage:
                 buffer += self.y - (other.y + other.h)
             return buffer
 
+        def grow_aisle(self):
+            direct = randrange(0, 4)
+            length = randrange(Stage.Aisle.MIN_LENGTH, Stage.Aisle.MAX_LENGTH)
+            if direct == 0:
+                ex = self.x
+                ey = randrange(self.y + 1, self.y + self.h - 1)
+                new_aisle = Stage.Aisle(ex, ey, ex - length, ey)
+            elif direct == 1:
+                ex = self.x + self.w
+                ey = randrange(self.y + 1, self.y + self.h - 1)
+                new_aisle = Stage.Aisle(ex, ey, ex + length, ey)
+            elif direct == 2:
+                ex = randrange(self.x + 1, self.x + self.w - 1)
+                ey = self.y
+                new_aisle = Stage.Aisle(ex, ey, ex, ey - length)
+            else:
+                ex = randrange(self.x + 1, self.x + self.w - 1)
+                ey = self.y + self.h
+                new_aisle = Stage.Aisle(ex, ey, ex, ey + length)
+
+            for other in chain(Stage.rooms, Stage.aisles):
+                if new_aisle.collision(other):
+                    break
+            else:
+                self.enter.append(new_aisle)
+            return False
+
     class Aisle:
+        MAX_LENGTH = 7
+        MIN_LENGTH = 3
+
         def __init__(self, x1, y1, x2, y2):
             self.x1 = x1
             self.y1 = y1
