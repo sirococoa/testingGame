@@ -20,14 +20,12 @@ class Stage:
     aisles = []
 
     class Room:
-        def __init__(self, width, height, min_size, max_size):
-            while True:
-                self.x = randrange(0, width)
-                self.y = randrange(0, height)
-                self.w = randrange(min_size, max_size)
-                self.h = randrange(min_size, max_size)
-                if self.x + self.w <= width and self.y + self.h <= height:
-                    break
+        def __init__(self, x, y, w, h):
+            self.x = x
+            self.y = y
+            self.w = w
+            self.h = h
+
             self.coll = False
 
             self.enter = []
@@ -77,6 +75,17 @@ class Stage:
                 self.enter.append(new_aisle)
             return False
 
+        @classmethod
+        def generate(cls, width, height, min_size, max_size):
+            while True:
+                x = randrange(0, width)
+                y = randrange(0, height)
+                w = randrange(min_size, max_size)
+                h = randrange(min_size, max_size)
+                if x + w <= width and y + h <= height:
+                    break
+            return Stage.Room(x, y, w, h)
+
     class Aisle:
         MAX_LENGTH = 7
         MIN_LENGTH = 3
@@ -106,7 +115,7 @@ class Stage:
         self.make_stage()
 
     def make_stage(self):
-        self.room_list = [Stage.Room(self.width, self.height, self.min_room_size, self.max_room_size) for _ in range(self.max_room_num)]
+        self.room_list = [Stage.Room.generate(self.width, self.height, self.min_room_size, self.max_room_size) for _ in range(self.max_room_num)]
         for a, b in combinations(self.room_list, 2):
             if not a.coll and a.collision(b):
                 b.coll = True
