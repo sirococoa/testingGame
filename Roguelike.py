@@ -20,6 +20,9 @@ class Stage:
     aisles = []
 
     class Room:
+        MAX_ROOM_SIZE = 7
+        MIN_ROOM_SIZE = 12
+
         def __init__(self, x, y, w, h):
             self.x = x
             self.y = y
@@ -54,19 +57,19 @@ class Stage:
             if direct == 0:
                 ex = self.x
                 ey = randrange(self.y + 1, self.y + self.h - 1)
-                new_aisle = Stage.Aisle(ex, ey, ex - length, ey)
+                new_aisle = Stage.Aisle(ex, ey, ex - length, ey, direct)
             elif direct == 1:
                 ex = self.x + self.w
                 ey = randrange(self.y + 1, self.y + self.h - 1)
-                new_aisle = Stage.Aisle(ex, ey, ex + length, ey)
+                new_aisle = Stage.Aisle(ex, ey, ex + length, ey, direct)
             elif direct == 2:
                 ex = randrange(self.x + 1, self.x + self.w - 1)
                 ey = self.y
-                new_aisle = Stage.Aisle(ex, ey, ex, ey - length)
+                new_aisle = Stage.Aisle(ex, ey, ex, ey - length, direct)
             else:
                 ex = randrange(self.x + 1, self.x + self.w - 1)
                 ey = self.y + self.h
-                new_aisle = Stage.Aisle(ex, ey, ex, ey + length)
+                new_aisle = Stage.Aisle(ex, ey, ex, ey + length, direct)
 
             for other in chain(Stage.rooms, Stage.aisles):
                 if new_aisle.collision(other):
@@ -90,11 +93,12 @@ class Stage:
         MAX_LENGTH = 7
         MIN_LENGTH = 3
 
-        def __init__(self, x1, y1, x2, y2):
+        def __init__(self, x1, y1, x2, y2, direct):
             self.x1 = x1
             self.y1 = y1
             self.x2 = x2
             self.y2 = y2
+            self.direct = direct
             self.x = min(self.x1, self.x2)
             self.y = min(self.y1, self.y2)
             self.w = abs(self.x1 - self.x2)
@@ -105,6 +109,20 @@ class Stage:
                 if -self.h <= self.y - other.y <= other.h:
                     return True
             return False
+
+        def grow_room(self):
+            rw = randrange(Stage.Room.MIN_ROOM_SIZE, Stage.Room.MAX_ROOM_SIZE)
+            rh = randrange(Stage.Room.MIN_ROOM_SIZE, Stage.Room.MAX_ROOM_SIZE)
+            if self.direct == 0:
+                new_room = Stage.Room(self.x2 - rw, self.y2, rw, rh)
+            elif self.direct == 1:
+                new_room = Stage.Room(self.x2, self.y2, rw, rh)
+            elif self.direct == 1:
+                new_room = Stage.Room(self.x2, self.y2 -rh, rw, rh)
+            else:
+                new_room = Stage.Room(self.x2, self.y2, rw, rh)
+            return new_room
+
 
     def __init__(self, width, height, max_room_num, min_room_size, max_room_size):
         self.width = width
