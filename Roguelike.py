@@ -27,6 +27,8 @@ class Stage:
                     break
             self.coll = False
 
+            self.enter = []
+
         def collision(self, other):
             if -self.w <= self.x - other.x <= other.w:
                 if -self.h <= self.y - other.y <= other.h:
@@ -44,6 +46,23 @@ class Stage:
             else:
                 buffer += self.y - (other.y + other.h)
             return buffer
+
+    class Aisle:
+        def __init__(self, x1, y1, x2, y2):
+            self.x1 = x1
+            self.y1 = y1
+            self.x2 = x2
+            self.y2 = y2
+            self.x = min(self.x1, self.x2)
+            self.y = min(self.y1, self.y2)
+            self.w = abs(self.x1 - self.x2)
+            self.h = abs(self.y1 - self.y2)
+
+        def collision(self, other):
+            if -self.w <= self.x - other.x <= other.w:
+                if -self.h <= self.y - other.y <= other.h:
+                    return True
+            return False
 
     def __init__(self, width, height, max_room_num, min_room_size, max_room_size):
         self.width = width
