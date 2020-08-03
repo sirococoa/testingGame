@@ -35,6 +35,8 @@ class Block:
         self.height = height
         self.child = []
         self.split = 0    # 0:x, 1:y
+        self.entrance = None
+        self.room = None
 
     def divide(self):
         if self.child:
@@ -64,6 +66,19 @@ class Block:
             sy = randint(1, self.height - h - 1)
             self.room = Room(sx, sy, w, h)
 
+    def make_entrance(self):
+        if self.child:
+            self.child[0].make_entrance()
+            self.child[1].make_entrance()
+            if self.split:
+                self.entrance = [0 for _ in range(4)]
+                self.entrance[0] = self.child[0].entrance[0]
+                self.entrance[1] = self.child[0].entrance[1] + self.child[1].entrance[1]
+                self.entrance[2] = self.child[1].entrance[2]
+                self.entrance[3] = self.child[0].entrance[3] + self.child[1].entrance[3]
+        else:
+            self.entrance = [[self.room.generate_entrance(i)] for i in (1, 0, 1, 0)]      # 0:up, 1:right, 2:down, 3:left
+
 
 class Room:
     MIN_SIZE = 5
@@ -74,6 +89,12 @@ class Room:
         self.sy = sy
         self.width = width
         self.height = height
+
+    def generate_entrance(self, direct):
+        if direct:
+            return randint(self.sy + 1, self.sy + self.height)
+        else:
+            return randint(self.sx + 1, self.sx + self.width)
 
 
 
