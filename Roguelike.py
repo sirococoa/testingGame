@@ -53,6 +53,29 @@ class Block:
                 self.split = 1
             return True
 
+    def make_room(self):
+        if self.child:
+            self.child[0].make_room()
+            self.child[1].make_room()
+        else:
+            w = randint(Room.MAX_SIZE, min(Room.MAX_SIZE, self.width - 2))
+            h = randint(Room.MAX_SIZE, min(Room.MAX_SIZE, self.height - 2))
+            sx = randint(1, self.width - w - 1)
+            sy = randint(1, self.height - h - 1)
+            self.room = Room(sx, sy, w, h)
+
+
+class Room:
+    MIN_SIZE = 5
+    MAX_SIZE = 10
+
+    def __init__(self, sx, sy, width, height):
+        self.sx = sx
+        self.sy = sy
+        self.width = width
+        self.height = height
+
+
 
 if __name__ == '__main__':
     RogueLike()
