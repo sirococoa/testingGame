@@ -60,8 +60,8 @@ class Block:
             self.child[0].make_room()
             self.child[1].make_room()
         else:
-            w = randint(Room.MAX_SIZE, min(Room.MAX_SIZE, self.width - 2))
-            h = randint(Room.MAX_SIZE, min(Room.MAX_SIZE, self.height - 2))
+            w = randint(Room.MIN_SIZE, min(Room.MAX_SIZE, self.width - 2))
+            h = randint(Room.MIN_SIZE, min(Room.MAX_SIZE, self.height - 2))
             sx = randint(1, self.width - w - 1)
             sy = randint(1, self.height - h - 1)
             self.room = Room(sx, sy, w, h)
@@ -76,8 +76,14 @@ class Block:
                 self.entrance[1] = self.child[0].entrance[1] + self.child[1].entrance[1]
                 self.entrance[2] = self.child[1].entrance[2]
                 self.entrance[3] = self.child[0].entrance[3] + self.child[1].entrance[3]
+            else:
+                self.entrance = [0 for _ in range(4)]
+                self.entrance[0] = self.child[0].entrance[0] + self.child[1].entrance[0]
+                self.entrance[1] = self.child[1].entrance[1]
+                self.entrance[2] = self.child[0].entrance[2] + self.child[1].entrance[2]
+                self.entrance[3] = self.child[0].entrance[3]
         else:
-            self.entrance = [[self.room.generate_entrance(i)] for i in (1, 0, 1, 0)]      # 0:up, 1:right, 2:down, 3:left
+            self.entrance = [[self.room.generate_entrance(i)] for i in (0, 1, 0, 1)]      # 0:up, 1:right, 2:down, 3:left
 
 
 class Room:
@@ -97,10 +103,11 @@ class Room:
             return randint(self.sx + 1, self.sx + self.width)
 
 
-
 if __name__ == '__main__':
     RogueLike()
     b = Block(100, 100)
     for _ in range(10):
         b.divide()
+    b.make_room()
+    b.make_entrance()
     print()
