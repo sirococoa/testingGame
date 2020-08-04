@@ -64,7 +64,10 @@ class Block:
 
     def divide(self):
         if self.child:
-            return self.child[randrange(1)].divide()
+            target = randrange(1)
+            if self.child[target].divide():
+                return True
+            return self.child[1 - target].divide()
         else:
             if random() < 0.5:
                 if self.width <= Block.MIN_SIZE*2:
@@ -179,7 +182,7 @@ class Path:
 
 if __name__ == '__main__':
     RogueLike()
-    s = Stage(30, 30)
+    s = Stage(50, 50)
     s.make_stage()
     for line in s.data:
         print("".join(map(str, line)))
