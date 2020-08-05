@@ -1,4 +1,7 @@
 from random import random, randrange, randint
+import numpy
+from scipy import signal
+from copy import copy
 
 import pyxel
 
@@ -14,10 +17,39 @@ class RogueLike:
         pass
 
 
+def translate_tile_num(base, shift):
+    return [base + shift, base + shift + 1, base + 32 + shift, base + 32 + shift +1]
+
+
 class Stage:
+    tile_num = list(map(translate_tile_num,
+                    (0, 128, 128, 192, 256, 256, 256, 192, 128, 128, 192, 192, 128),
+                    (0, 2,   4,   2,   4,   4,   0,   0,   0,   8,   8,   6,   6)))
+    tile_kind = (
+        (int("000000100", 2), 2),
+        (int("100000000", 2), 4),
+        (int("001000000", 2), 6),
+        (int("000000001", 2), 8),
+        (int("000000010", 2), 1),
+        (int("000100000", 2), 3),
+        (int("010000000", 2), 5),
+        (int("000001000", 2), 7),
+        (int("000100110", 2), 9),
+        (int("110100000", 2), 10),
+        (int("011001000", 2), 11),
+        (int("000001011", 2), 12),
+        (int("010000010", 2), 14),
+        (int("000101000", 2), 17),
+        (int("011001011", 2), 13),
+        (int("110100110", 2), 15),
+        (int("000101111", 2), 16),
+        (int("111101000", 2), 18),
+    )
+
     def __init__(self, width, height):
         self.width = width
         self.height = height
+        self.filter = numpy.array([2 ** i for i in range(9)]).reshape((3, 3))
         self.make_stage()
         self.data = None
 
@@ -28,7 +60,7 @@ class Stage:
         block.make_room()
         block.make_path()
 
-        self.data = [[' ' for _ in range(self.height)] for _ in range(self.height)]
+        self.data = [[0 for _ in range(self.height)] for _ in range(self.height)]
 
         # room の追加
         for x, y, room in block.rooms():
@@ -44,7 +76,17 @@ class Stage:
             y2 = max(s[1], t[1])
             for i in range(x1, x2 + 1):
                 for j in range(y1, y2 + 1):
-                    self.data[i][j] = 2
+                    self.data[i][j] = 1
+
+        self.make_map()
+
+    def make_map(self):
+        self.data = numpy.array(self.data)
+        terrain = signal.correlate(self.data, self.filter, mode='same')
+        self.tile = numpy.zeros((self.width, self.height), dtype=int)
+        for key, value in Stage.tile_kind:
+            self.tile[terrain & key == key] = value
+        self.tile[self.data == 1] = 0
 
     def draw(self):
         pass
@@ -185,5 +227,7 @@ if __name__ == '__main__':
     s = Stage(50, 50)
     s.make_stage()
     for line in s.data:
-        print("".join(map(str, line)))
+        print("".join(map(lambda x: str(x%10) if x != 0 else " ", line)))
+    for line in s.tile:
+        print("".join(map(lambda x: str(x%10) if x != 0 else " ", line)))
     print()
