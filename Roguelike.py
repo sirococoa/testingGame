@@ -5,9 +5,14 @@ from copy import copy
 
 import pyxel
 
+WINDOW_WIDTH = 200
+WINDOW_HEIGHT = 200
 
 class RogueLike:
     def __init__(self):
+        # pyxel.load('rogue.pyxres')
+        # pyxel.init(WINDOW_WIDTH, WINDOW_HEIGHT)
+        # pyxel.run(self.update, self.draw)
         pass
 
     def update(self):
@@ -23,21 +28,21 @@ def translate_tile_num(base, shift):
 
 class Stage:
     tile_num = list(map(translate_tile_num,
-                    (0, 128, 128, 192, 256, 256, 256, 192, 128, 128, 192, 192, 128),
-                    (0, 2,   4,   2,   4,   4,   0,   0,   0,   8,   8,   6,   6)))
+                    (0, 128, 128, 192, 256, 256, 256, 192, 128, 128, 192, 192, 128, 256, 256, 256, 128, 192, 256),
+                    (0, 2,   4,   4,   4,   2,   0,   0,   0,   8,   8,   6,   6,   6,   8,   10,  12,  12,  12)))
     tile_kind = (
-        (int("000000100", 2), 2),
-        (int("100000000", 2), 4),
-        (int("001000000", 2), 6),
-        (int("000000001", 2), 8),
+        (int("000000100", 2), 9),
+        (int("100000000", 2), 10),
+        (int("001000000", 2), 11),
+        (int("000000001", 2), 12),
         (int("000000010", 2), 1),
         (int("000100000", 2), 3),
         (int("010000000", 2), 5),
         (int("000001000", 2), 7),
-        (int("000100110", 2), 9),
-        (int("110100000", 2), 10),
-        (int("011001000", 2), 11),
-        (int("000001011", 2), 12),
+        (int("000100110", 2), 2),
+        (int("110100000", 2), 4),
+        (int("011001000", 2), 6),
+        (int("000001011", 2), 8),
         (int("010000010", 2), 14),
         (int("000101000", 2), 17),
         (int("011001011", 2), 13),
@@ -79,6 +84,20 @@ class Stage:
                     self.data[i][j] = 1
 
         self.make_map()
+        for i in range(self.width):
+            for j in range(self.height):
+                t1, t2, t3, t4 = Stage.tile_num[self.tile[i][j]]
+                pyxel.tilemap(0).set(j * 2, i * 2, t1)
+                pyxel.tilemap(0).set(j * 2 + 1, i * 2, t2)
+                pyxel.tilemap(0).set(j * 2, i * 2 + 1, t3)
+                pyxel.tilemap(0).set(j * 2 + 1, i * 2 + 1, t4)
+
+        # for i in range(len(self.tile_num)):
+        #     t1, t2, t3, t4 = Stage.tile_num[i]
+        #     pyxel.tilemap(0).set(i, 0, t1)
+        #     pyxel.tilemap(0).set(i, 1, t2)
+        #     pyxel.tilemap(0).set(i, 2, t3)
+        #     pyxel.tilemap(0).set(i, 3, t4)
 
     def make_map(self):
         self.data = numpy.array(self.data)
@@ -88,13 +107,15 @@ class Stage:
             self.tile[terrain & key == key] = value
         self.tile[self.data == 1] = 0
 
+        self.tile = self.tile.tolist()
+
     def draw(self):
-        pass
+        pyxel.bltm(0, 0, 0, 0, 0, 30, 30)
 
 
 class Block:
-    MIN_SIZE = 10
-    MAX_NUM = 8
+    MIN_SIZE = 5
+    MAX_NUM = 20
     
     def __init__(self, width, height):
         self.width = width
@@ -200,7 +221,7 @@ class Block:
 
 
 class Room:
-    MIN_SIZE = 5
+    MIN_SIZE = 2
     MAX_SIZE = 15
 
     def __init__(self, sx, sy, width, height):
@@ -224,10 +245,16 @@ class Path:
 
 if __name__ == '__main__':
     RogueLike()
-    s = Stage(50, 50)
+    pyxel.init(WINDOW_WIDTH, WINDOW_HEIGHT)
+    pyxel.load('rogue.pyxres')
+
+    # pyxel.run(self.update, self.draw)
+    s = Stage(30, 30)
     s.make_stage()
     for line in s.data:
         print("".join(map(lambda x: str(x%10) if x != 0 else " ", line)))
     for line in s.tile:
         print("".join(map(lambda x: str(x%10) if x != 0 else " ", line)))
+    s.draw()
+    pyxel.show()
     print()
