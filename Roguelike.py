@@ -8,18 +8,21 @@ import pyxel
 WINDOW_WIDTH = 200
 WINDOW_HEIGHT = 200
 
+
 class RogueLike:
     def __init__(self):
-        # pyxel.load('rogue.pyxres')
-        # pyxel.init(WINDOW_WIDTH, WINDOW_HEIGHT)
-        # pyxel.run(self.update, self.draw)
-        pass
+        pyxel.init(WINDOW_WIDTH, WINDOW_HEIGHT)
+        pyxel.load('rogue.pyxres')
+        self.stage = Stage(30, 30)
+        self.player = Player()
+        pyxel.run(self.update, self.draw)
 
     def update(self):
-        pass
+        self.player.update()
 
     def draw(self):
-        pass
+        self.stage.draw()
+        self.player.draw()
 
 
 def translate_tile_num(base, shift):
@@ -114,8 +117,8 @@ class Stage:
 
 
 class Block:
-    MIN_SIZE = 5
-    MAX_NUM = 20
+    MIN_SIZE = 10
+    MAX_NUM = 8
     
     def __init__(self, width, height):
         self.width = width
@@ -221,8 +224,8 @@ class Block:
 
 
 class Room:
-    MIN_SIZE = 2
-    MAX_SIZE = 15
+    MIN_SIZE = 5
+    MAX_SIZE = 10
 
     def __init__(self, sx, sy, width, height):
         self.sx = sx
@@ -243,18 +246,53 @@ class Path:
         self.length = length
 
 
+class Player:
+    INIT_HP = 3
+    INIT_ATK = 1
+    U = 16
+    V = 0
+    W = 16
+    H = 16
+
+    def __init__(self):
+        self.x = 0
+        self.y = 0
+        self.hp = Player.INIT_HP
+        self.atk = Player.INIT_ATK
+        self.direct = 0
+
+    def update(self):
+        if pyxel.btn(pyxel.KEY_W):
+            self.y -= 1
+            self.direct = 0
+        elif pyxel.btn(pyxel.KEY_D):
+            self.x += 1
+            self.direct = 1
+        elif pyxel.btn(pyxel.KEY_S):
+            self.y += 1
+            self.direct = 2
+        elif pyxel.btn(pyxel.KEY_A):
+            self.x -= 1
+            self.direct = 3
+        else:
+            pass
+
+    def draw(self):
+        pyxel.blt(self.x * 16, self.y * 16, 0, Player.U + Player.W * self.direct, Player.V, Player.W, Player.H)
+
+
 if __name__ == '__main__':
     RogueLike()
-    pyxel.init(WINDOW_WIDTH, WINDOW_HEIGHT)
-    pyxel.load('rogue.pyxres')
-
-    # pyxel.run(self.update, self.draw)
-    s = Stage(30, 30)
-    s.make_stage()
-    for line in s.data:
-        print("".join(map(lambda x: str(x%10) if x != 0 else " ", line)))
-    for line in s.tile:
-        print("".join(map(lambda x: str(x%10) if x != 0 else " ", line)))
-    s.draw()
-    pyxel.show()
+    # pyxel.init(WINDOW_WIDTH, WINDOW_HEIGHT)
+    # pyxel.load('rogue.pyxres')
+    #
+    # # pyxel.run(self.update, self.draw)
+    # s = Stage(30, 30)
+    # s.make_stage()
+    # for line in s.data:
+    #     print("".join(map(lambda x: str(x%10) if x != 0 else " ", line)))
+    # for line in s.tile:
+    #     print("".join(map(lambda x: str(x%10) if x != 0 else " ", line)))
+    # s.draw()
+    # pyxel.show()
     print()
