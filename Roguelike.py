@@ -64,7 +64,7 @@ class Stage:
         self.make_stage()
 
     def make_stage(self):
-        self.block = Block(self.width, self.height)
+        self.block = Block(0, 0, self.width, self.height)
         for _ in range(Block.MAX_NUM):
             self.block.divide()
         self.block.make_room()
@@ -73,9 +73,9 @@ class Stage:
         self.data = numpy.zeros((self.width, self.height), dtype=int)
 
         # room の追加
-        for x, y, room in self.block.rooms():
-            for i in range(x + room.sx, x + room.sx + room.width):
-                for j in range(y + room.sy, y + room.sy + room.height):
+        for room in self.block.rooms():
+            for i in range(room.x, room.x + room.width):
+                for j in range(room.y, room.y + room.height):
                     self.data[i, j] = 1
 
         # aisle の追加
@@ -121,7 +121,7 @@ class Stage:
     def choice_room(self):
         tmp = self.block
         while tmp.child:
-            tmp = tmp.child[0]
+            tmp = tmp.child[randint(0, 1)]
         return tmp.room
 
     def draw(self, px, py):
@@ -134,7 +134,9 @@ class Block:
     MIN_SIZE = 10
     MAX_NUM = 8
     
-    def __init__(self, width, height):
+    def __init__(self,x, y, width, height):
+        self.x = x
+        self.y = y
         self.width = width
         self.height = height
         self.child = []
@@ -153,12 +155,12 @@ class Block:
                 if self.width <= Block.MIN_SIZE*2:
                     return False
                 w = randint(Block.MIN_SIZE, self.width - Block.MIN_SIZE)
-                self.child = [Block(w, self.height), Block(self.width - w, self.height)]
+                self.child = [Block(self.x, self.y, w, self.height), Block(self.x + w, self.y, self.width - w, self.height)]
             else:
                 if self.height <= Block.MIN_SIZE*2:
                     return False
                 h = randint(Block.MIN_SIZE, self.height - Block.MIN_SIZE)
-                self.child = [Block(self.width, h), Block(self.width, self.height - h)]
+                self.child = [Block(self.x, self.y, self.width, h), Block(self.x, self.y + h, self.width, self.height - h)]
                 self.split = 1
             return True
 
@@ -171,77 +173,69 @@ class Block:
             h = randint(Room.MIN_SIZE, min(Room.MAX_SIZE, self.height - 3))
             sx = randint(2, self.width - w - 1)
             sy = randint(2, self.height - h - 1)
-            self.room = Room(sx, sy, w, h)
+            self.room = Room(self.x + sx, self.y + sy, w, h, sx, sy)
 
-    def make_path(self, x=0, y=0):
+    def make_path(self):
+        self.path = [0 for _ in range(4)]
         if self.child:
+            self.child[0].make_path()
+            self.child[1].make_path()
             if self.split:
-                self.child[0].make_path(x, y)
-                self.child[1].make_path(x, y + self.child[0].height)
-
-                self.path = [0 for _ in range(4)]
                 self.path[0] = self.child[0].path[0]
                 self.path[1] = self.child[0].path[1] + self.child[1].path[1]
                 self.path[2] = self.child[1].path[2]
                 self.path[3] = self.child[0].path[3] + self.child[1].path[3]
             else:
-                self.child[0].make_path(x, y)
-                self.child[1].make_path(x + self.child[0].width, y)
-
-                self.path = [0 for _ in range(4)]
                 self.path[0] = self.child[0].path[0] + self.child[1].path[0]
                 self.path[1] = self.child[1].path[1]
                 self.path[2] = self.child[0].path[2] + self.child[1].path[2]
                 self.path[3] = self.child[0].path[3]
         else:
-            self.path = [0 for _ in range(4)]
-            self.path[0] = [Path(x + self.room.generate_entrance(0), self.room.sy - 1)]
-            self.path[1] = [Path(y + self.room.generate_entrance(1), self.width - self.room.sx - self.room.width)]
-            self.path[2] = [Path(x + self.room.generate_entrance(0), self.height - self.room.sy - self.room.height)]
-            self.path[3] = [Path(y + self.room.generate_entrance(1), self.room.sx - 1)]
+            self.path[0] = [Path(self.room.generate_entrance(0), self.room.sy - 1)]
+            self.path[1] = [Path(self.room.generate_entrance(1), self.width - self.room.sx - self.room.width)]
+            self.path[2] = [Path(self.room.generate_entrance(0), self.height - self.room.sy - self.room.height)]
+            self.path[3] = [Path(self.room.generate_entrance(1), self.room.sx - 1)]
 
-    def rooms(self, x=0, y=0):
+    def rooms(self):
         if self.child:
-            if self.split:
-                yield from self.child[0].rooms(x, y)
-                yield from self.child[1].rooms(x, y + self.child[0].height)
-            else:
-                yield from self.child[0].rooms(x, y)
-                yield from self.child[1].rooms(x + self.child[0].width, y)
+            yield from self.child[0].rooms()
+            yield from self.child[1].rooms()
         else:
-            yield x, y, self.room
+            yield self.room
 
-    def paths(self, x=0, y=0):
+    def paths(self):
         if self.child:
             if self.split:
                 positions = []
                 for p in self.child[0].path[2]:
                     positions.append(p.pos)
-                    yield (p.pos, y + self.child[0].height), (p.pos, y + self.child[0].height - p.length)
+                    yield (p.pos, self.y + self.child[0].height), (p.pos, self.y + self.child[0].height - p.length)
                 for p in self.child[1].path[0]:
                     positions.append(p.pos)
-                    yield (p.pos, y + self.child[0].height), (p.pos, y + self.child[0].height + p.length)
-                yield (min(positions), y + self.child[0].height), (max(positions), y + self.child[0].height)
-                yield from self.child[0].paths(x, y)
-                yield from self.child[1].paths(x, y + self.child[0].height)
+                    yield (p.pos, self.y + self.child[0].height), (p.pos, self.y + self.child[0].height + p.length)
+                yield (min(positions), self.y + self.child[0].height), (max(positions), self.y + self.child[0].height)
+                yield from self.child[0].paths()
+                yield from self.child[1].paths()
             else:
                 positions = []
                 for p in self.child[0].path[1]:
                     positions.append(p.pos)
-                    yield (x + self.child[0].width, p.pos), (x + self.child[0].width - p.length, p.pos)
+                    yield (self.x + self.child[0].width, p.pos), (self.x + self.child[0].width - p.length, p.pos)
                 for p in self.child[1].path[3]:
                     positions.append(p.pos)
-                    yield (x + self.child[0].width, p.pos), (x + self.child[0].width + p.length, p.pos)
-                yield (x + self.child[0].width, min(positions)), (x + self.child[0].width, max(positions))
-                yield from self.child[0].paths(x, y)
-                yield from self.child[1].paths(x + self.child[0].width, y)
+                    yield (self.x + self.child[0].width, p.pos), (self.x + self.child[0].width + p.length, p.pos)
+                yield (self.x + self.child[0].width, min(positions)), (self.x + self.child[0].width, max(positions))
+                yield from self.child[0].paths()
+                yield from self.child[1].paths()
 
 
 class Room:
     MIN_SIZE = 5
     MAX_SIZE = 10
 
-    def __init__(self, sx, sy, width, height):
+    def __init__(self, x, y, width, height, sx, sy):
+        self.x = x
+        self.y = y
         self.sx = sx
         self.sy = sy
         self.width = width
@@ -249,9 +243,9 @@ class Room:
 
     def generate_entrance(self, direct):
         if direct:
-            return randint(self.sy + 1, self.sy + self.height - 1)
+            return randint(self.y + 1, self.y + self.height - 1)
         else:
-            return randint(self.sx + 1, self.sx + self.width - 1)
+            return randint(self.x + 1, self.x + self.width - 1)
 
 
 class Path:
@@ -298,8 +292,8 @@ class Player:
 
     def spawn(self):
         init_room = RogueLike.stage.choice_room()
-        self.y = randint(init_room.sx, init_room.sx + init_room.width)
-        self.x = randint(init_room.sy, init_room.sy + init_room.height)
+        self.y = randint(init_room.x, init_room.x + init_room.width - 1)
+        self.x = randint(init_room.y, init_room.y + init_room.height - 1)
 
 
     def draw(self):
