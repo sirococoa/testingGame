@@ -17,6 +17,7 @@ class RogueLike:
         pyxel.load('rogue.pyxres')
         RogueLike.stage = Stage(30, 30)
         self.player = Player()
+        self.player.spawn()
         pyxel.run(self.update, self.draw)
 
     def update(self):
@@ -61,32 +62,31 @@ class Stage:
         self.height = height
         self.filter = numpy.array([2 ** i for i in range(9)]).reshape((3, 3))
         self.make_stage()
-        self.data = None
 
     def make_stage(self):
-        block = Block(self.width, self.height)
+        self.block = Block(self.width, self.height)
         for _ in range(Block.MAX_NUM):
-            block.divide()
-        block.make_room()
-        block.make_path()
+            self.block.divide()
+        self.block.make_room()
+        self.block.make_path()
 
-        self.data = [[0 for _ in range(self.height)] for _ in range(self.height)]
+        self.data = numpy.zeros((self.width, self.height), dtype=int)
 
         # room の追加
-        for x, y, room in block.rooms():
+        for x, y, room in self.block.rooms():
             for i in range(x + room.sx, x + room.sx + room.width):
                 for j in range(y + room.sy, y + room.sy + room.height):
-                    self.data[i][j] = 1
+                    self.data[i, j] = 1
 
         # aisle の追加
-        for s, t in block.paths():
+        for s, t in self.block.paths():
             x1 = min(s[0], t[0])
             x2 = max(s[0], t[0])
             y1 = min(s[1], t[1])
             y2 = max(s[1], t[1])
             for i in range(x1, x2 + 1):
                 for j in range(y1, y2 + 1):
-                    self.data[i][j] = 1
+                    self.data[i, j] = 1
 
         self.make_map()
         for i in range(self.width):
@@ -105,7 +105,6 @@ class Stage:
         #     pyxel.tilemap(0).set(i, 3, t4)
 
     def make_map(self):
-        self.data = numpy.array(self.data)
         terrain = signal.correlate(self.data, self.filter, mode='same')
         self.tile = numpy.zeros((self.width, self.height), dtype=int)
         for key, value in Stage.tile_kind:
@@ -113,6 +112,17 @@ class Stage:
         self.tile[self.data == 1] = 0
 
         self.tile = self.tile.tolist()
+
+    def collision(self, x, y):
+        if 0 <= x <= self.width and 0 <= x <= self.height:
+            return not bool(self.data[y, x])
+        return True
+
+    def choice_room(self):
+        tmp = self.block
+        while tmp.child:
+            tmp = tmp.child[0]
+        return tmp.room
 
     def draw(self, px, py):
         u = px*2 - WINDOW_WIDTH // 16
@@ -266,20 +276,31 @@ class Player:
         self.direct = 0
 
     def update(self):
+        new_x = self.x
+        new_y = self.y
         if pyxel.btn(pyxel.KEY_W):
-            self.y -= 1
+            new_y -= 1
             self.direct = 0
         elif pyxel.btn(pyxel.KEY_D):
-            self.x += 1
+            new_x += 1
             self.direct = 1
         elif pyxel.btn(pyxel.KEY_S):
-            self.y += 1
+            new_y += 1
             self.direct = 2
         elif pyxel.btn(pyxel.KEY_A):
-            self.x -= 1
+            new_x -= 1
             self.direct = 3
         else:
             pass
+        if not RogueLike.stage.collision(new_x, new_y):
+            self.x = new_x
+            self.y = new_y
+
+    def spawn(self):
+        init_room = RogueLike.stage.choice_room()
+        self.y = randint(init_room.sx, init_room.sx + init_room.width)
+        self.x = randint(init_room.sy, init_room.sy + init_room.height)
+
 
     def draw(self):
         pyxel.blt(WINDOW_WIDTH//2, WINDOW_WIDTH//2, 0, Player.U + Player.W * self.direct, Player.V, Player.W, Player.H)
