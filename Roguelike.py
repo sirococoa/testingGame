@@ -5,15 +5,17 @@ from copy import copy
 
 import pyxel
 
-WINDOW_WIDTH = 200
-WINDOW_HEIGHT = 200
+WINDOW_WIDTH = 256
+WINDOW_HEIGHT = 256
 
 
 class RogueLike:
+    stage = None
+
     def __init__(self):
         pyxel.init(WINDOW_WIDTH, WINDOW_HEIGHT)
         pyxel.load('rogue.pyxres')
-        self.stage = Stage(30, 30)
+        RogueLike.stage = Stage(30, 30)
         self.player = Player()
         pyxel.run(self.update, self.draw)
 
@@ -21,7 +23,7 @@ class RogueLike:
         self.player.update()
 
     def draw(self):
-        self.stage.draw()
+        RogueLike.stage.draw(self.player.x, self.player.y)
         self.player.draw()
 
 
@@ -112,8 +114,10 @@ class Stage:
 
         self.tile = self.tile.tolist()
 
-    def draw(self):
-        pyxel.bltm(0, 0, 0, 0, 0, 30, 30)
+    def draw(self, px, py):
+        u = px*2 - WINDOW_WIDTH // 16
+        v = py*2 - WINDOW_HEIGHT // 16
+        pyxel.bltm(0, 0, 0, u, v, WINDOW_WIDTH // 8, WINDOW_HEIGHT // 8)
 
 
 class Block:
@@ -278,7 +282,7 @@ class Player:
             pass
 
     def draw(self):
-        pyxel.blt(self.x * 16, self.y * 16, 0, Player.U + Player.W * self.direct, Player.V, Player.W, Player.H)
+        pyxel.blt(WINDOW_WIDTH//2, WINDOW_WIDTH//2, 0, Player.U + Player.W * self.direct, Player.V, Player.W, Player.H)
 
 
 if __name__ == '__main__':
