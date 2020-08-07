@@ -22,6 +22,9 @@ class RogueLike:
 
     def update(self):
         self.player.update()
+        if self.player.on_stair():
+            RogueLike.stage.make_stage()
+            self.player.spawn()
 
     def draw(self):
         RogueLike.stage.draw(self.player.x, self.player.y)
@@ -56,6 +59,10 @@ class Stage:
         (int("000101111", 2), 16),
         (int("111101000", 2), 18),
     )
+    stair_x = 0
+    stair_y = 0
+    stair_u = 0
+    stair_v = 80
 
     def __init__(self, width, height):
         self.width = width
@@ -97,6 +104,8 @@ class Stage:
                 pyxel.tilemap(0).set(j * 2, i * 2 + 1, t3)
                 pyxel.tilemap(0).set(j * 2 + 1, i * 2 + 1, t4)
 
+        Stage.stair_x, Stage.stair_y = self.choice_room_point()
+
         # for i in range(len(self.tile_num)):
         #     t1, t2, t3, t4 = Stage.tile_num[i]
         #     pyxel.tilemap(0).set(i, 0, t1)
@@ -124,10 +133,18 @@ class Stage:
             tmp = tmp.child[randint(0, 1)]
         return tmp.room
 
+    def choice_room_point(self):
+        r = self.choice_room()
+        return randint(r.y, r.y + r.height - 1), randint(r.x, r.x + r.width - 1)
+
     def draw(self, px, py):
         u = px*2 - WINDOW_WIDTH // 16
         v = py*2 - WINDOW_HEIGHT // 16
         pyxel.bltm(0, 0, 0, u, v, WINDOW_WIDTH // 8, WINDOW_HEIGHT // 8)
+
+        sx = (Stage.stair_x - px) + WINDOW_WIDTH // 32
+        sy = (Stage.stair_y - py) + WINDOW_HEIGHT // 32
+        pyxel.blt(sx * 16, sy * 16, 0, Stage.stair_u, Stage.stair_v, 16, 16)
 
 
 class Block:
@@ -291,10 +308,10 @@ class Player:
             self.y = new_y
 
     def spawn(self):
-        init_room = RogueLike.stage.choice_room()
-        self.y = randint(init_room.x, init_room.x + init_room.width - 1)
-        self.x = randint(init_room.y, init_room.y + init_room.height - 1)
+        self.x, self.y = RogueLike.stage.choice_room_point()
 
+    def on_stair(self):
+        return self.x == Stage.stair_x and self.y == Stage.stair_y
 
     def draw(self):
         pyxel.blt(WINDOW_WIDTH//2, WINDOW_WIDTH//2, 0, Player.U + Player.W * self.direct, Player.V, Player.W, Player.H)
