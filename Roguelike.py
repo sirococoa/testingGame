@@ -11,25 +11,42 @@ WINDOW_HEIGHT = 256
 
 class RogueLike:
     stage = None
+    enemy_list =[]
 
     def __init__(self):
         pyxel.init(WINDOW_WIDTH, WINDOW_HEIGHT)
         pyxel.load('rogue.pyxres')
+        self.state = 0 # 0:player -> 1 -> 2:enemy -> 3 -> 0
         RogueLike.stage = Stage(30, 30)
         self.player = Player()
         self.player.spawn()
+        RogueLike.enemy_list.append(Enemy(0, 0))
         pyxel.run(self.update, self.draw)
 
     def update(self):
-        self.player.update()
-        if self.player.on_stair():
-            RogueLike.stage.make_stage()
-            self.player.spawn()
+        if self.state == 0:
+            if self.player.update():
+                self.state += 2
+            if self.player.on_stair():
+                RogueLike.stage.make_stage()
+                self.player.spawn()
+        elif self.state == 1:
+            self.state += 1
+        elif self.state == 2:
+            for enemy in RogueLike.enemy_list:
+                enemy.update()
+            self.state = 0
+        elif self.state == 3:
+            self.state = 0
+        else:
+            pass
 
     def draw(self):
         pyxel.cls(0)
         RogueLike.stage.draw(self.player.x, self.player.y)
         self.player.draw()
+        for enemy in RogueLike.enemy_list:
+            enemy.draw(self.player.x, self.player.y)
 
 
 def translate_tile_num(base, shift):
@@ -303,10 +320,13 @@ class Player:
             new_x -= 1
             self.direct = 3
         else:
-            pass
+            return False
         if not RogueLike.stage.collision(new_x, new_y):
             self.x = new_x
             self.y = new_y
+            return True
+        return False
+
 
     def spawn(self):
         self.x, self.y = RogueLike.stage.choice_room_point()
@@ -317,6 +337,48 @@ class Player:
     def draw(self):
         pyxel.blt(WINDOW_WIDTH//2, WINDOW_WIDTH//2, 0, Player.U + Player.W * self.direct, Player.V, Player.W, Player.H)
 
+
+class Enemy:
+    U = 80
+    V = 0
+    W = 16
+    H = 16
+
+    def __init__(self, hp, atk):
+        self.hp = hp
+        self.atk = atk
+        self.direct = 0
+        self.spawn()
+
+    def spawn(self):
+        self.x, self.y = RogueLike.stage.choice_room_point()
+
+    def update(self):
+        new_x = self.x
+        new_y = self.y
+        move_dir = randint(0, 4)
+        if move_dir == 0:
+            new_y -= 1
+            self.direct = 0
+        elif move_dir == 1:
+            new_x += 1
+            self.direct = 1
+        elif move_dir == 2:
+            new_y += 1
+            self.direct = 2
+        elif move_dir == 3:
+            new_x -= 1
+            self.direct = 3
+        else:
+            pass
+        if not RogueLike.stage.collision(new_x, new_y):
+            self.x = new_x
+            self.y = new_y
+
+    def draw(self, px, py):
+        draw_x = (self.x - px) + WINDOW_WIDTH // 32
+        draw_y = (self.y - py) + WINDOW_HEIGHT // 32
+        pyxel.blt(draw_x * 16, draw_y * 16, 0, Enemy.U + Enemy.W * self.direct, Enemy.V, Enemy.W, Enemy.H)
 
 if __name__ == '__main__':
     RogueLike()
