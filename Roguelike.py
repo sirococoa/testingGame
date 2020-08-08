@@ -27,6 +27,7 @@ class RogueLike:
             self.player.spawn()
 
     def draw(self):
+        pyxel.cls(0)
         RogueLike.stage.draw(self.player.x, self.player.y)
         self.player.draw()
 
