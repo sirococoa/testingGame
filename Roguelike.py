@@ -5,6 +5,7 @@ from copy import copy
 
 import pyxel
 
+import pyxel_tools as pt
 from astar import a_star
 
 WINDOW_WIDTH = 256
@@ -22,26 +23,33 @@ class RogueLike:
         RogueLike.stage = Stage(30, 30)
         self.player = Player()
         self.player.spawn()
-        RogueLike.enemy_list.append(Enemy(0, 0))
+        RogueLike.enemy_list.append(Enemy(10, 10))
         pyxel.run(self.update, self.draw)
 
     def update(self):
         if self.state == 0:
             if self.player.update():
-                self.state += 2
+                self.state += 1
             if self.player.on_stair():
                 RogueLike.stage.make_stage()
                 self.player.spawn()
-        elif self.state == 1:
+        if self.state == 1:
+            if pt.ParticleSystem.particles:
+                pt.ParticleSystem.update()
+                return
             self.state += 1
-        elif self.state == 2:
+        if self.state == 2:
             for enemy in RogueLike.enemy_list:
                 enemy.update(self.player.x, self.player.y)
+            self.state += 1
+        if self.state == 3:
+            if pt.ParticleSystem.particles:
+                pt.ParticleSystem.update()
+                return
             self.state = 0
-        elif self.state == 3:
-            self.state = 0
-        else:
-            pass
+
+        RogueLike.enemy_list = [enemy for enemy in RogueLike.enemy_list if enemy.hp > 0]
+
 
     def draw(self):
         pyxel.cls(0)
@@ -49,6 +57,7 @@ class RogueLike:
         self.player.draw()
         for enemy in RogueLike.enemy_list:
             enemy.draw(self.player.x, self.player.y)
+        pt.ParticleSystem.draw()
 
 
 def translate_tile_num(base, shift):
@@ -298,6 +307,7 @@ class Player:
     V = 0
     W = 16
     H = 16
+    ATK_TARGET = ((0, -1), (1, 0), (0, 1), (-1, 0))
 
     def __init__(self):
         self.x = 0
@@ -307,6 +317,16 @@ class Player:
         self.direct = 0
 
     def update(self):
+        if pyxel.btn(pyxel.KEY_SPACE):
+            atk_x = self.x + Player.ATK_TARGET[self.direct][0]
+            atk_y = self.y + Player.ATK_TARGET[self.direct][1]
+            for enemy in RogueLike.enemy_list:
+                if atk_x == enemy.x and atk_y == enemy.y:
+                    enemy.hp -= self.atk
+                    break
+            AtkEffect.generate(atk_x, atk_y, self.x, self.y)
+            return True
+
         new_x = self.x
         new_y = self.y
         if pyxel.btn(pyxel.KEY_W):
@@ -333,7 +353,6 @@ class Player:
             self.y = new_y
             return True
         return False
-
 
     def spawn(self):
         self.x, self.y = RogueLike.stage.choice_room_point()
@@ -392,6 +411,21 @@ class Enemy:
         draw_x = (self.x - px) + WINDOW_WIDTH // 32
         draw_y = (self.y - py) + WINDOW_HEIGHT // 32
         pyxel.blt(draw_x * 16, draw_y * 16, 0, Enemy.U + Enemy.W * self.direct, Enemy.V, Enemy.W, Enemy.H)
+
+
+class AtkEffect:
+    U = 0
+    V = 16
+    W = 16
+    H = 16
+    TIME = 10
+    FLAME = 1
+
+    @classmethod
+    def generate(cls, x, y, px, py):
+        draw_x = (x - px) + WINDOW_WIDTH // 32
+        draw_y = (y - py) + WINDOW_HEIGHT // 32
+        pt.ParticleSystem.generate(draw_x * 16 + 8, draw_y * 16 + 8, AtkEffect.U, AtkEffect.V, AtkEffect.W, AtkEffect.H, AtkEffect.TIME, AtkEffect.FLAME, colkey=0)
 
 
 if __name__ == '__main__':
