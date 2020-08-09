@@ -16,6 +16,8 @@ class RogueLike:
     stage = None
     enemy_list =[]
 
+    SPAWN_INCREASE_RATE = 5
+
     def __init__(self):
         pyxel.init(WINDOW_WIDTH, WINDOW_HEIGHT)
         pyxel.load('rogue.pyxres')
@@ -23,9 +25,8 @@ class RogueLike:
         RogueLike.stage = Stage(30, 30)
         self.player = Player()
         self.player.spawn()
-        RogueLike.enemy_list.append(Enemy(10, 10))
-        RogueLike.enemy_list.append(Enemy(10, 10))
-        RogueLike.enemy_list.append(Enemy(10, 10))
+        self.floor = 1
+        self.spawn_enemy()
         pyxel.run(self.update, self.draw)
 
     def update(self):
@@ -35,6 +36,8 @@ class RogueLike:
             if self.player.on_stair():
                 RogueLike.stage.make_stage()
                 self.player.spawn()
+                self.spawn_enemy()
+                self.floor += 1
         if self.state == 1:
             if pt.ParticleSystem.particles:
                 pt.ParticleSystem.update()
@@ -53,6 +56,10 @@ class RogueLike:
 
         RogueLike.enemy_list = [enemy for enemy in RogueLike.enemy_list if enemy.hp > 0]
 
+    def spawn_enemy(self):
+        RogueLike.enemy_list = []
+        for _ in range(self.floor // RogueLike.SPAWN_INCREASE_RATE + 1):
+            RogueLike.enemy_list.append(Enemy(self.floor, self.floor))
 
     def draw(self):
         pyxel.cls(0)
