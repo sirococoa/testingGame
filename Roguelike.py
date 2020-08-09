@@ -24,6 +24,8 @@ class RogueLike:
         self.player = Player()
         self.player.spawn()
         RogueLike.enemy_list.append(Enemy(10, 10))
+        RogueLike.enemy_list.append(Enemy(10, 10))
+        RogueLike.enemy_list.append(Enemy(10, 10))
         pyxel.run(self.update, self.draw)
 
     def update(self):
@@ -39,6 +41,7 @@ class RogueLike:
                 return
             self.state += 1
         if self.state == 2:
+            Enemy.load_stage_data()
             for enemy in RogueLike.enemy_list:
                 enemy.update(self.player.x, self.player.y)
             self.state += 1
@@ -369,6 +372,7 @@ class Enemy:
     V = 0
     W = 16
     H = 16
+    stage_data = None
 
     def __init__(self, hp, atk):
         self.hp = hp
@@ -380,7 +384,10 @@ class Enemy:
         self.x, self.y = RogueLike.stage.choice_room_point()
 
     def update(self, px, py):
-        d, route = a_star(RogueLike.stage.data.T.tolist(), (self.x, self.y), (px, py))
+        d, route = a_star(Enemy.stage_data, (self.x, self.y), (px, py))
+
+        if route is None:
+            print()
 
         tmp = route[(px, py)]
         new_x = px
@@ -399,11 +406,14 @@ class Enemy:
         if self.y - new_y == -1:
             self.direct = 2
 
-        print(px, py, new_x, new_y)
-
         if (new_x, new_y) == (px, py):
             AtkEffect.generate(px, py, px, py)
             return
+
+        for enemy in RogueLike.enemy_list:
+            if enemy != self:
+                if enemy.x == new_x and enemy.y == new_y:
+                    return
 
         if not RogueLike.stage.collision(new_x, new_y):
             self.x = new_x
@@ -413,6 +423,12 @@ class Enemy:
         draw_x = (self.x - px) + WINDOW_WIDTH // 32
         draw_y = (self.y - py) + WINDOW_HEIGHT // 32
         pyxel.blt(draw_x * 16, draw_y * 16, 0, Enemy.U + Enemy.W * self.direct, Enemy.V, Enemy.W, Enemy.H)
+
+    @classmethod
+    def load_stage_data(cls):
+        Enemy.stage_data = RogueLike.stage.data.T.tolist()
+        for enemy in RogueLike.enemy_list:
+            Enemy.stage_data[enemy.x][enemy.y] = 4
 
 
 class AtkEffect:
