@@ -43,7 +43,7 @@ class RogueLike:
         if self.state == 2:
             Enemy.load_stage_data()
             for enemy in RogueLike.enemy_list:
-                enemy.update(self.player.x, self.player.y)
+                enemy.update(self.player)
             self.state += 1
         if self.state == 3:
             if pt.ParticleSystem.particles:
@@ -383,15 +383,15 @@ class Enemy:
     def spawn(self):
         self.x, self.y = RogueLike.stage.choice_room_point()
 
-    def update(self, px, py):
-        d, route = a_star(Enemy.stage_data, (self.x, self.y), (px, py))
+    def update(self, player):
+        d, route = a_star(Enemy.stage_data, (self.x, self.y), (player.x, player.y))
 
         if route is None:
             print()
 
-        tmp = route[(px, py)]
-        new_x = px
-        new_y = py
+        tmp = route[(player.x, player.y)]
+        new_x = player.x
+        new_y = player.y
         while tmp != (self.x, self.y):
             new_x = tmp[0]
             new_y = tmp[1]
@@ -406,8 +406,8 @@ class Enemy:
         if self.y - new_y == -1:
             self.direct = 2
 
-        if (new_x, new_y) == (px, py):
-            AtkEffect.generate(px, py, px, py)
+        if (new_x, new_y) == (player.x, player.y):
+            AtkEffect.generate(player.x, player.y, player.x, player.y)
             return
 
         for enemy in RogueLike.enemy_list:
