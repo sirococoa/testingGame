@@ -383,8 +383,8 @@ class Enemy:
         d, route = a_star(RogueLike.stage.data.T.tolist(), (self.x, self.y), (px, py))
 
         tmp = route[(px, py)]
-        new_x = tmp[0]
-        new_y = tmp[1]
+        new_x = px
+        new_y = py
         while tmp != (self.x, self.y):
             new_x = tmp[0]
             new_y = tmp[1]
@@ -399,8 +399,10 @@ class Enemy:
         if self.y - new_y == -1:
             self.direct = 2
 
+        print(px, py, new_x, new_y)
+
         if (new_x, new_y) == (px, py):
-            # ATK
+            AtkEffect.generate(px, py, px, py)
             return
 
         if not RogueLike.stage.collision(new_x, new_y):
