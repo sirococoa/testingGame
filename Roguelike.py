@@ -5,6 +5,8 @@ from copy import copy
 
 import pyxel
 
+from astar import a_star
+
 WINDOW_WIDTH = 256
 WINDOW_HEIGHT = 256
 
@@ -34,7 +36,7 @@ class RogueLike:
             self.state += 1
         elif self.state == 2:
             for enemy in RogueLike.enemy_list:
-                enemy.update()
+                enemy.update(self.player.x, self.player.y)
             self.state = 0
         elif self.state == 3:
             self.state = 0
@@ -321,6 +323,11 @@ class Player:
             self.direct = 3
         else:
             return False
+
+        for enemy in RogueLike.enemy_list:
+            if new_x == enemy.x and new_y == enemy.y:
+                return False
+
         if not RogueLike.stage.collision(new_x, new_y):
             self.x = new_x
             self.y = new_y
@@ -353,24 +360,30 @@ class Enemy:
     def spawn(self):
         self.x, self.y = RogueLike.stage.choice_room_point()
 
-    def update(self):
-        new_x = self.x
-        new_y = self.y
-        move_dir = randint(0, 4)
-        if move_dir == 0:
-            new_y -= 1
-            self.direct = 0
-        elif move_dir == 1:
-            new_x += 1
-            self.direct = 1
-        elif move_dir == 2:
-            new_y += 1
-            self.direct = 2
-        elif move_dir == 3:
-            new_x -= 1
+    def update(self, px, py):
+        d, route = a_star(RogueLike.stage.data.T.tolist(), (self.x, self.y), (px, py))
+
+        tmp = route[(px, py)]
+        new_x = tmp[0]
+        new_y = tmp[1]
+        while tmp != (self.x, self.y):
+            new_x = tmp[0]
+            new_y = tmp[1]
+            tmp = route[tmp]
+
+        if self.x - new_x == 1:
             self.direct = 3
-        else:
-            pass
+        if self.x - new_x == -1:
+            self.direct = 1
+        if self.y - new_y == 1:
+            self.direct = 0
+        if self.y - new_y == -1:
+            self.direct = 2
+
+        if (new_x, new_y) == (px, py):
+            # ATK
+            return
+
         if not RogueLike.stage.collision(new_x, new_y):
             self.x = new_x
             self.y = new_y
@@ -379,6 +392,7 @@ class Enemy:
         draw_x = (self.x - px) + WINDOW_WIDTH // 32
         draw_y = (self.y - py) + WINDOW_HEIGHT // 32
         pyxel.blt(draw_x * 16, draw_y * 16, 0, Enemy.U + Enemy.W * self.direct, Enemy.V, Enemy.W, Enemy.H)
+
 
 if __name__ == '__main__':
     RogueLike()
