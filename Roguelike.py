@@ -339,16 +339,16 @@ class Player:
 
         new_x = self.x
         new_y = self.y
-        if pyxel.btn(pyxel.KEY_W):
+        if pyxel.btnp(pyxel.KEY_W, 0, 2):
             new_y -= 1
             self.direct = 0
-        elif pyxel.btn(pyxel.KEY_D):
+        elif pyxel.btnp(pyxel.KEY_D, 0, 2):
             new_x += 1
             self.direct = 1
-        elif pyxel.btn(pyxel.KEY_S):
+        elif pyxel.btnp(pyxel.KEY_S, 0, 2):
             new_y += 1
             self.direct = 2
-        elif pyxel.btn(pyxel.KEY_A):
+        elif pyxel.btnp(pyxel.KEY_A, 0, 2):
             new_x -= 1
             self.direct = 3
         else:
