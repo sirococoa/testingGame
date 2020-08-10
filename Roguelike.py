@@ -18,8 +18,10 @@ class RogueLike:
     item_list = []
 
     SPAWN_INCREASE_RATE = 5
-    ATK_ITEM_NUM = 3
-    HP_ITEM_NUM = 3
+    ENEMY_ATK_INCREASE_RATE = 5
+    ENEMY_HP_INCREASE_RATE = 1
+    MAX_ATK_ITEM_NUM = 1
+    MAX_HP_ITEM_NUM = 2
 
     def __init__(self):
         pyxel.init(WINDOW_WIDTH, WINDOW_HEIGHT)
@@ -63,18 +65,20 @@ class RogueLike:
     def spawn_enemy(self):
         RogueLike.enemy_list = []
         for _ in range(self.floor // RogueLike.SPAWN_INCREASE_RATE + 1):
-            RogueLike.enemy_list.append(Enemy(self.floor, self.floor))
+            RogueLike.enemy_list.append(Enemy(self.floor // RogueLike.ENEMY_HP_INCREASE_RATE + 1, self.floor // RogueLike.ENEMY_ATK_INCREASE_RATE + 1))
 
     def spawn_item(self):
         RogueLike.item_list = []
-        for _ in range(RogueLike.ATK_ITEM_NUM):
+        for _ in range(randint(0, RogueLike.MAX_ATK_ITEM_NUM)):
             RogueLike.item_list.append(AtkItem(*self.stage.choice_room_point()))
-        for _ in range(RogueLike.HP_ITEM_NUM):
+        for _ in range(randint(0, RogueLike.MAX_HP_ITEM_NUM)):
             RogueLike.item_list.append(HPItem(*self.stage.choice_room_point()))
 
     def next_floor(self):
         RogueLike.stage.make_stage()
         self.player.spawn()
+        self.player.hp += 1
+        self.player.max_hp += 1
         self.spawn_enemy()
         self.spawn_item()
         self.floor += 1
@@ -345,6 +349,7 @@ class Player:
     W = 16
     H = 16
     ATK_TARGET = ((0, -1), (1, 0), (0, 1), (-1, 0))
+    INPUT_INTERVAL = 3
 
     def __init__(self):
         self.x = 0
@@ -367,16 +372,16 @@ class Player:
 
         new_x = self.x
         new_y = self.y
-        if pyxel.btnp(pyxel.KEY_W, 0, 2):
+        if pyxel.btnp(pyxel.KEY_W, 0, Player.INPUT_INTERVAL):
             new_y -= 1
             self.direct = 0
-        elif pyxel.btnp(pyxel.KEY_D, 0, 2):
+        elif pyxel.btnp(pyxel.KEY_D, 0, Player.INPUT_INTERVAL):
             new_x += 1
             self.direct = 1
-        elif pyxel.btnp(pyxel.KEY_S, 0, 2):
+        elif pyxel.btnp(pyxel.KEY_S, 0, Player.INPUT_INTERVAL):
             new_y += 1
             self.direct = 2
-        elif pyxel.btnp(pyxel.KEY_A, 0, 2):
+        elif pyxel.btnp(pyxel.KEY_A, 0, Player.INPUT_INTERVAL):
             new_x -= 1
             self.direct = 3
         else:
@@ -395,7 +400,6 @@ class Player:
 
     def spawn(self):
         self.x, self.y = RogueLike.stage.choice_room_point()
-        self.hp = self.max_hp
 
     def on_stair(self):
         return self.x == Stage.stair_x and self.y == Stage.stair_y
@@ -524,8 +528,8 @@ class HPItem(Item):
 
     def pick(self, player):
         super().pick(player)
-        player.hp += 1
         player.max_hp += 1
+        player.hp = player.max_hp
 
 
 class UISystem:
