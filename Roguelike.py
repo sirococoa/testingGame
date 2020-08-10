@@ -36,27 +36,29 @@ class RogueLike:
     def update(self):
         RogueLike.enemy_list = [enemy for enemy in RogueLike.enemy_list if enemy.hp > 0]
         RogueLike.item_list = [item for item in RogueLike.item_list if not item.getted]
-
-        if self.state == 0:
-            if self.player.update():
+        if self.player.hp <= 0:
+            pass
+        else:
+            if self.state == 0:
+                if self.player.update():
+                    self.state += 1
+                if self.player.on_stair():
+                    self.next_floor()
+            if self.state == 1:
+                if pt.ParticleSystem.particles:
+                    pt.ParticleSystem.update()
+                    return
                 self.state += 1
-            if self.player.on_stair():
-                self.next_floor()
-        if self.state == 1:
-            if pt.ParticleSystem.particles:
-                pt.ParticleSystem.update()
-                return
-            self.state += 1
-        if self.state == 2:
-            Enemy.load_stage_data()
-            for enemy in RogueLike.enemy_list:
-                enemy.update(self.player)
-            self.state += 1
-        if self.state == 3:
-            if pt.ParticleSystem.particles:
-                pt.ParticleSystem.update()
-                return
-            self.state = 0
+            if self.state == 2:
+                Enemy.load_stage_data()
+                for enemy in RogueLike.enemy_list:
+                    enemy.update(self.player)
+                self.state += 1
+            if self.state == 3:
+                if pt.ParticleSystem.particles:
+                    pt.ParticleSystem.update()
+                    return
+                self.state = 0
 
     def spawn_enemy(self):
         RogueLike.enemy_list = []
@@ -77,17 +79,22 @@ class RogueLike:
         self.spawn_item()
         self.floor += 1
 
-
     def draw(self):
         pyxel.cls(0)
-        RogueLike.stage.draw(self.player.x, self.player.y)
-        self.player.draw()
-        for enemy in RogueLike.enemy_list:
-            enemy.draw(self.player.x, self.player.y)
-        pt.ParticleSystem.draw()
-        for item in RogueLike.item_list:
-            item.draw(self.player.x, self.player.y)
-        UISystem.draw()
+        if self.player.hp <= 0:
+            message = "GAME OVER"
+            pyxel.text(pt.center(message, WINDOW_WIDTH), WINDOW_HEIGHT // 2, message, 7)
+            message = "Your Score : {}".format(str(self.floor))
+            pyxel.text(pt.center(message, WINDOW_WIDTH), WINDOW_HEIGHT // 4 * 3, message, 7)
+        else:
+            RogueLike.stage.draw(self.player.x, self.player.y)
+            self.player.draw()
+            for enemy in RogueLike.enemy_list:
+                enemy.draw(self.player.x, self.player.y)
+            pt.ParticleSystem.draw()
+            for item in RogueLike.item_list:
+                item.draw(self.player.x, self.player.y)
+            UISystem.draw()
 
 
 def translate_tile_num(base, shift):
