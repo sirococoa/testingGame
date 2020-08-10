@@ -15,8 +15,11 @@ WINDOW_HEIGHT = 256
 class RogueLike:
     stage = None
     enemy_list =[]
+    item_list = []
 
     SPAWN_INCREASE_RATE = 5
+    ATK_ITEM_NUM = 3
+    HP_ITEM_NUM = 3
 
     def __init__(self):
         pyxel.init(WINDOW_WIDTH, WINDOW_HEIGHT)
@@ -24,20 +27,21 @@ class RogueLike:
         self.state = 0 # 0:player -> 1 -> 2:enemy -> 3 -> 0
         RogueLike.stage = Stage(30, 30)
         self.player = Player()
-        self.player.spawn()
-        self.floor = 1
-        self.spawn_enemy()
+        self.floor = 0
+        self.next_floor()
+        UISystem.generate_ATKUI(self.player)
+        UISystem.generate_HPUI(self.player)
         pyxel.run(self.update, self.draw)
 
     def update(self):
+        RogueLike.enemy_list = [enemy for enemy in RogueLike.enemy_list if enemy.hp > 0]
+        RogueLike.item_list = [item for item in RogueLike.item_list if not item.getted]
+
         if self.state == 0:
             if self.player.update():
                 self.state += 1
             if self.player.on_stair():
-                RogueLike.stage.make_stage()
-                self.player.spawn()
-                self.spawn_enemy()
-                self.floor += 1
+                self.next_floor()
         if self.state == 1:
             if pt.ParticleSystem.particles:
                 pt.ParticleSystem.update()
@@ -54,12 +58,25 @@ class RogueLike:
                 return
             self.state = 0
 
-        RogueLike.enemy_list = [enemy for enemy in RogueLike.enemy_list if enemy.hp > 0]
-
     def spawn_enemy(self):
         RogueLike.enemy_list = []
         for _ in range(self.floor // RogueLike.SPAWN_INCREASE_RATE + 1):
             RogueLike.enemy_list.append(Enemy(self.floor, self.floor))
+
+    def spawn_item(self):
+        RogueLike.item_list = []
+        for _ in range(RogueLike.ATK_ITEM_NUM):
+            RogueLike.item_list.append(AtkItem(*self.stage.choice_room_point()))
+        for _ in range(RogueLike.HP_ITEM_NUM):
+            RogueLike.item_list.append(HPItem(*self.stage.choice_room_point()))
+
+    def next_floor(self):
+        RogueLike.stage.make_stage()
+        self.player.spawn()
+        self.spawn_enemy()
+        self.spawn_item()
+        self.floor += 1
+
 
     def draw(self):
         pyxel.cls(0)
@@ -68,6 +85,9 @@ class RogueLike:
         for enemy in RogueLike.enemy_list:
             enemy.draw(self.player.x, self.player.y)
         pt.ParticleSystem.draw()
+        for item in RogueLike.item_list:
+            item.draw(self.player.x, self.player.y)
+        UISystem.draw()
 
 
 def translate_tile_num(base, shift):
@@ -322,6 +342,7 @@ class Player:
     def __init__(self):
         self.x = 0
         self.y = 0
+        self.max_hp = Player.INIT_HP
         self.hp = Player.INIT_HP
         self.atk = Player.INIT_ATK
         self.direct = 0
@@ -361,14 +382,21 @@ class Player:
         if not RogueLike.stage.collision(new_x, new_y):
             self.x = new_x
             self.y = new_y
+            self.pick_item()
             return True
         return False
 
     def spawn(self):
         self.x, self.y = RogueLike.stage.choice_room_point()
+        self.hp = self.max_hp
 
     def on_stair(self):
         return self.x == Stage.stair_x and self.y == Stage.stair_y
+
+    def pick_item(self):
+        for item in RogueLike.item_list:
+            if self.x == item.x and self.y == item.y:
+                item.pick(self)
 
     def draw(self):
         pyxel.blt(WINDOW_WIDTH//2, WINDOW_WIDTH//2, 0, Player.U + Player.W * self.direct, Player.V, Player.W, Player.H)
@@ -415,6 +443,7 @@ class Enemy:
 
         if (new_x, new_y) == (player.x, player.y):
             AtkEffect.generate(player.x, player.y, player.x, player.y)
+            player.hp -= self.atk
             return
 
         for enemy in RogueLike.enemy_list:
@@ -451,6 +480,81 @@ class AtkEffect:
         draw_x = (x - px) + WINDOW_WIDTH // 32
         draw_y = (y - py) + WINDOW_HEIGHT // 32
         pt.ParticleSystem.generate(draw_x * 16 + 8, draw_y * 16 + 8, AtkEffect.U, AtkEffect.V, AtkEffect.W, AtkEffect.H, AtkEffect.TIME, AtkEffect.FLAME, colkey=0)
+
+
+class Item:
+    U = 0
+    V = 0
+    W = 16
+    H = 16
+
+    def __init__(self, x, y):
+        self.x = x
+        self.y = y
+        self.getted = False
+
+    def pick(self, player):
+        self.getted = True
+
+    def draw(self, px, py):
+        draw_x = (self.x - px) + WINDOW_WIDTH // 32
+        draw_y = (self.y - py) + WINDOW_HEIGHT // 32
+        pyxel.blt(draw_x * 16, draw_y * 16, 0, self.U, self.V, self.W, self.H)
+
+
+class AtkItem(Item):
+    U = 32
+    V = 16
+
+    def pick(self, player):
+        super().pick(player)
+        player.atk += 1
+
+
+class HPItem(Item):
+    U = 16
+    V = 16
+
+    def pick(self, player):
+        super().pick(player)
+        player.hp += 1
+        player.max_hp += 1
+
+
+class UISystem:
+    ui_list = []
+
+    class UI:
+        def __init__(self, x, y, u, v, w, h, f):
+            self.x = x
+            self.y = y
+            self.w = w
+            self.h = h
+            self.blt_params = [x, y, 0, u, v, w, h]
+            self.f = f
+
+        def draw(self):
+            pyxel.blt(*self.blt_params)
+            pyxel.text(self.x + self.w + 1, self.y + self.h//2 - 2, str(self.f()), 7)
+
+    @classmethod
+    def generate_ATKUI(cls, player):
+        def f():
+            return player.atk
+
+        UISystem.ui_list.append(UISystem.UI(32, 0, 16, 96, 8, 8, f))
+
+    @classmethod
+    def generate_HPUI(cls, player):
+        def f():
+            return player.hp
+
+        UISystem.ui_list.append(UISystem.UI(0, 0, 0, 96, 8, 8, f))
+
+    @classmethod
+    def draw(cls):
+        for ui in UISystem.ui_list:
+            ui.draw()
 
 
 if __name__ == '__main__':
