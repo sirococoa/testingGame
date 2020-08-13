@@ -36,13 +36,17 @@ class RogueLike:
         pyxel.run(self.update, self.draw)
 
     def update(self):
+        for enemy in RogueLike.enemy_list:
+            if enemy.hp <= 0:
+                DataCollector.kill()
         RogueLike.enemy_list = [enemy for enemy in RogueLike.enemy_list if enemy.hp > 0]
         RogueLike.item_list = [item for item in RogueLike.item_list if not item.getted]
         if self.player.hp <= 0:
-            pass
+            DataCollector.output(self.player, self.floor)
         else:
             if self.state == 0:
                 if self.player.update():
+                    DataCollector.update()
                     self.state += 1
                 if self.player.on_stair():
                     self.next_floor()
@@ -361,6 +365,7 @@ class Player:
 
     def update(self):
         if pyxel.btn(pyxel.KEY_SPACE):
+            DataCollector.attack()
             atk_x = self.x + Player.ATK_TARGET[self.direct][0]
             atk_y = self.y + Player.ATK_TARGET[self.direct][1]
             for enemy in RogueLike.enemy_list:
@@ -432,13 +437,19 @@ class Enemy:
     def update(self, player):
         d, route = a_star(Enemy.stage_data, (self.x, self.y), (player.x, player.y))
 
+        if d == 'inf':
+            print("route is missing!")
+            return
+
         if route is None:
-            print()
+            print("route is None!")
 
         tmp = route[(player.x, player.y)]
         new_x = player.x
         new_y = player.y
         while tmp != (self.x, self.y):
+            if tmp is None:
+                print("tmp is None!")
             new_x = tmp[0]
             new_y = tmp[1]
             tmp = route[tmp]
@@ -453,6 +464,7 @@ class Enemy:
             self.direct = 2
 
         if (new_x, new_y) == (player.x, player.y):
+            DataCollector.damaged()
             AtkEffect.generate(player.x, player.y, player.x, player.y)
             player.hp -= self.atk
             return
@@ -527,6 +539,7 @@ class HPItem(Item):
     V = 16
 
     def pick(self, player):
+        DataCollector.heal(player)
         super().pick(player)
         player.max_hp += 1
         player.hp = player.max_hp
@@ -566,6 +579,49 @@ class UISystem:
     def draw(cls):
         for ui in UISystem.ui_list:
             ui.draw()
+
+
+class DataCollector:
+    turn = 0
+    attack_num = 0
+    damaged_num = 0
+    kill_num = 0
+    heal_amount = 0
+    outputed = False
+
+    @classmethod
+    def update(cls):
+        cls.turn += 1
+
+    @classmethod
+    def attack(cls):
+        cls.attack_num += 1
+
+    @classmethod
+    def damaged(cls):
+        cls.damaged_num += 1
+
+    @classmethod
+    def kill(cls):
+        cls.kill_num += 1
+
+    @classmethod
+    def heal(cls, player):
+        cls.heal_amount += player.max_hp - player.hp
+
+    @classmethod
+    def output(cls, player, floor):
+        if not cls.outputed:
+            with open('rogue_log.txt', 'w') as f:
+                f.write(str(floor) + '\n')
+                f.write(str(cls.turn) + '\n')
+                f.write(str(cls.attack_num) + '\n')
+                f.write(str(cls.damaged_num) + '\n')
+                f.write(str(cls.kill_num) + '\n')
+                f.write(str(cls.heal_amount) + '\n')
+                f.write(str(player.max_hp) + '\n')
+                f.write(str(player.atk) + '\n')
+            cls.outputed = True
 
 
 if __name__ == '__main__':
