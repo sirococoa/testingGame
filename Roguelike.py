@@ -66,26 +66,63 @@ class RogueLike:
                     return
                 self.state = 0
 
+    def spawn_player(self):
+        while True:
+            x, y = RogueLike.stage.choice_room_point()
+            if self.check_spawn_collision(x, y):
+                continue
+            self.player.x = x
+            self.player.y = y
+            break
+
     def spawn_enemy(self):
         RogueLike.enemy_list = []
         for _ in range(self.floor // RogueLike.SPAWN_INCREASE_RATE + 1):
-            RogueLike.enemy_list.append(Enemy(self.floor // RogueLike.ENEMY_HP_INCREASE_RATE + 1, self.floor // RogueLike.ENEMY_ATK_INCREASE_RATE + 1))
+            while True:
+                x, y = RogueLike.stage.choice_room_point()
+                if self.check_spawn_collision(x, y):
+                    continue
+                RogueLike.enemy_list.append(Enemy(x, y, self.floor // RogueLike.ENEMY_HP_INCREASE_RATE + 1, self.floor // RogueLike.ENEMY_ATK_INCREASE_RATE + 1))
+                break
 
     def spawn_item(self):
         RogueLike.item_list = []
         for _ in range(randint(0, RogueLike.MAX_ATK_ITEM_NUM)):
-            RogueLike.item_list.append(AtkItem(*self.stage.choice_room_point()))
+            while True:
+                x, y = RogueLike.stage.choice_room_point()
+                if self.check_spawn_collision(x, y):
+                    continue
+                RogueLike.item_list.append(AtkItem(x, y))
+                break
         for _ in range(randint(0, RogueLike.MAX_HP_ITEM_NUM)):
-            RogueLike.item_list.append(HPItem(*self.stage.choice_room_point()))
+            while True:
+                x, y = RogueLike.stage.choice_room_point()
+                if self.check_spawn_collision(x, y):
+                    continue
+                RogueLike.item_list.append(HPItem(x, y))
+                break
 
     def next_floor(self):
         RogueLike.stage.make_stage()
-        self.player.spawn()
+        self.spawn_player()
         self.player.hp += 1
         self.player.max_hp += 1
         self.spawn_enemy()
         self.spawn_item()
         self.floor += 1
+
+    def check_spawn_collision(self, x, y):
+        if self.player.x == x and self.player.y == y:
+            return True
+        for enemy in RogueLike.enemy_list:
+            if enemy.x == x and enemy.y == y:
+                return True
+        for item in RogueLike.item_list:
+            if item.x == x and item.y == y:
+                return True
+        if Stage.stair_x == x and Stage.stair_y == y:
+            return True
+        return False
 
     def draw(self):
         pyxel.cls(0)
@@ -96,12 +133,12 @@ class RogueLike:
             pyxel.text(pt.center(message, WINDOW_WIDTH), WINDOW_HEIGHT // 4 * 3, message, 7)
         else:
             RogueLike.stage.draw(self.player.x, self.player.y)
+            for item in RogueLike.item_list:
+                item.draw(self.player.x, self.player.y)
             self.player.draw()
             for enemy in RogueLike.enemy_list:
                 enemy.draw(self.player.x, self.player.y)
             pt.ParticleSystem.draw()
-            for item in RogueLike.item_list:
-                item.draw(self.player.x, self.player.y)
             UISystem.draw()
 
 
@@ -403,9 +440,6 @@ class Player:
             return True
         return False
 
-    def spawn(self):
-        self.x, self.y = RogueLike.stage.choice_room_point()
-
     def on_stair(self):
         return self.x == Stage.stair_x and self.y == Stage.stair_y
 
@@ -425,14 +459,12 @@ class Enemy:
     H = 16
     stage_data = None
 
-    def __init__(self, hp, atk):
+    def __init__(self,x, y, hp, atk):
+        self.x = x
+        self.y = y
         self.hp = hp
         self.atk = atk
         self.direct = 0
-        self.spawn()
-
-    def spawn(self):
-        self.x, self.y = RogueLike.stage.choice_room_point()
 
     def update(self, player):
         d, route = a_star(Enemy.stage_data, (self.x, self.y), (player.x, player.y))
