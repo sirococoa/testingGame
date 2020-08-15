@@ -25,7 +25,7 @@ class RogueLike:
 
     def __init__(self):
         pyxel.init(WINDOW_WIDTH, WINDOW_HEIGHT)
-        pyxel.load('rogue.pyxres')
+        pyxel.load('assets/rogue.pyxres')
         self.state = 0 # 0:player -> 1 -> 2:enemy -> 3 -> 0
         RogueLike.stage = Stage(30, 30)
         self.player = Player()

@@ -16,7 +16,7 @@ class Shooting:
 
     def __init__(self):
         pyxel.init(WINDOW_WIDTH, WINDOW_HEIGHT)
-        pyxel.load('shooting.pyxres')
+        pyxel.load('assets/shooting.pyxres')
         self.player = Player(WINDOW_WIDTH//2, int(WINDOW_HEIGHT*0.8))
         self.asteroid_rate = Shooting.INIT_ASTEROIDS_RATE
         self.gameover = None
