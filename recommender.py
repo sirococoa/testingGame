@@ -115,6 +115,54 @@ class RecommendFrame(tk.Frame):
         message = tk.Label(self, text=u'Recommend you game')
         message.pack(side='top')
 
+        next_button = tk.Button(self, text="Next")
+        next_button.bind('<Button-1>', self.next)
+        next_button.pack(side='bottom')
+
+    def next(self, event):
+        self.master.switch_frame(RegisterFrame)
+
+
+class RegisterFrame(tk.Frame):
+    CHECK_BOX_NAME = ["好き", "少し好き", "少し嫌い", "嫌い"]
+    EVALUATE_POINT = [2, 1, -1, -2]
+
+    def __init__(self, master):
+        super().__init__(master)
+        self.master = master
+        self.pack()
+        self.game_name_list = set()
+        self.game_list = []
+        self.evaluate = tk.IntVar()
+        self.evaluate.set(0)
+        self.info = tk.StringVar()
+        self.widgets()
+
+    def widgets(self):
+        message = tk.Label(self, text=u'Write your favorite games!')
+        message.pack(side='top')
+
+        self.game_name_box = tk.Entry(self)
+        self.game_name_box.pack()
+
+        add_button = tk.Button(self, text="登録")
+        add_button.bind('<Button-1>', self.add_favorite_game)
+        add_button.pack()
+
+        for i, name in enumerate(self.CHECK_BOX_NAME):
+            radio_button = tk.Radiobutton(self, text=name, variable=self.evaluate, value=i)
+            radio_button.pack()
+
+        select_info = tk.Label(self, textvariable=self.info)
+        select_info.pack()
+
+    def add_favorite_game(self, event):
+        name = self.game_name_box.get()
+        if name and name not in self.game_name_list:
+            self.game_name_list.add(name)
+            self.game_list.append([name, self.evaluate.get()])
+            self.info.set('\n'.join(map(lambda x: str(x[0]) + " " + self.CHECK_BOX_NAME[x[1]], self.game_list)))
+
 
 if __name__ == '__main__':
     app = RecommendSystem()
