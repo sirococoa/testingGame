@@ -644,15 +644,14 @@ class DataCollector:
     @classmethod
     def output(cls, player, floor):
         if not cls.outputed:
-            with open('rogue_log.txt', 'w') as f:
-                f.write(str(floor) + '\n')
-                f.write(str(cls.turn) + '\n')
-                f.write(str(cls.attack_num) + '\n')
-                f.write(str(cls.damaged_num) + '\n')
-                f.write(str(cls.kill_num) + '\n')
-                f.write(str(cls.heal_amount) + '\n')
-                f.write(str(player.max_hp) + '\n')
-                f.write(str(player.atk) + '\n')
+            print(floor)
+            print(cls.turn)
+            print(cls.attack_num)
+            print(cls.damaged_num)
+            print(cls.kill_num)
+            print(cls.heal_amount)
+            print(player.max_hp)
+            print(player.atk)
             cls.outputed = True
 
 

@@ -217,12 +217,12 @@ class DataCollector:
 
     def output(self):
         with open('shooting_log.txt', 'w') as f:
-            f.write(str(self.left_input_num) + "\n")
-            f.write(str(self.right_input_num) + "\n")
-            f.write(str(self.attack_input_num) + "\n")
-            f.write(str(self.change_direction_num) + "\n")
-            f.write(str(self.destroy_asteroid_num) + "\n")
-            f.write(str(self.clear_step_num) + "\n")
+            print(self.left_input_num)
+            print(self.right_input_num)
+            print(self.attack_input_num)
+            print(self.change_direction_num)
+            print(self.destroy_asteroid_num)
+            print(self.clear_step_num)
 
 
 def draw_stock(num):

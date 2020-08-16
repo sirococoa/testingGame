@@ -55,6 +55,7 @@ class GamePlayFrame(tk.Frame):
         self.pack()
         self.widgets()
         self.play_flag = [False for _ in range(self.GAME_NUM)]
+        self.play_data = [[] for _ in range(self.GAME_NUM)]
         self.select_game_num = 0
 
     def widgets(self):
@@ -88,9 +89,12 @@ class GamePlayFrame(tk.Frame):
 
     def run_game(self, event):
         print('run ' + self.GAMES[self.select_game_num])
-        subprocess.run(['python', self.GAMES[self.select_game_num] + '.py'])
+        cp = subprocess.run(['python', self.GAMES[self.select_game_num] + '.py'], encoding='utf-8', stdout=subprocess.PIPE)
+        output = cp.stdout.rstrip('\n').split('\n')
         print('end ' + self.GAMES[self.select_game_num])
-        self.play_flag[self.select_game_num] = True
+        if output:
+            self.play_flag[self.select_game_num] = True
+            self.play_data[self.select_game_num] = output
 
     def next(self, event):
         self.master.switch_frame(RecommendFrame)
