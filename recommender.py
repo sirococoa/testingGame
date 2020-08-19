@@ -4,12 +4,17 @@ import tkinter as tk
 import subprocess
 import functools
 
+from connectSQL import MysqlConnector
+
 
 class RecommendSystem(tk.Tk):
     def __init__(self):
         super().__init__()
         self.title("Game Recommend System")
         self.geometry("500x500")
+        self.db = MysqlConnector()
+        self.play_flag = [False for _ in range(GamePlayFrame.GAME_NUM)]
+        self.play_data = [[] for _ in range(GamePlayFrame.GAME_NUM)]
         self.use_frame = GamePlayFrame(self)
 
     def switch_frame(self, new_frame_class):
@@ -54,8 +59,7 @@ class GamePlayFrame(tk.Frame):
         self.master = master
         self.pack()
         self.widgets()
-        self.play_flag = [False for _ in range(self.GAME_NUM)]
-        self.play_data = [[] for _ in range(self.GAME_NUM)]
+
         self.select_game_num = 0
 
     def widgets(self):
@@ -93,8 +97,8 @@ class GamePlayFrame(tk.Frame):
         output = cp.stdout.rstrip('\n').split('\n')
         print('end ' + self.GAMES[self.select_game_num])
         if output:
-            self.play_flag[self.select_game_num] = True
-            self.play_data[self.select_game_num] = output
+            self.master.play_flag[self.select_game_num] = True
+            self.master.play_data[self.select_game_num] = output
 
     def next(self, event):
         self.master.switch_frame(RecommendFrame)
@@ -145,7 +149,7 @@ class RegisterFrame(tk.Frame):
         self.game_name_box = tk.Entry(self)
         self.game_name_box.pack()
 
-        add_button = tk.Button(self, text="登録")
+        add_button = tk.Button(self, text="追加")
         add_button.bind('<Button-1>', self.add_favorite_game)
         add_button.pack()
 
@@ -156,12 +160,21 @@ class RegisterFrame(tk.Frame):
         select_info = tk.Label(self, textvariable=self.info)
         select_info.pack()
 
+        send_button = tk.Button(self, text='登録')
+        send_button.bind('<Button-1>', self.send_favorite_game)
+        send_button.pack()
+
     def add_favorite_game(self, event):
         name = self.game_name_box.get()
         if name and name not in self.game_name_list:
             self.game_name_list.add(name)
             self.game_list.append([name, self.evaluate.get()])
             self.info.set('\n'.join(map(lambda x: str(x[0]) + " " + self.CHECK_BOX_NAME[x[1]], self.game_list)))
+
+    def send_favorite_game(self, event):
+        self.master.db.insert_play_data(self.master.play_data, map(lambda x: (x[0], self.EVALUATE_POINT[x[1]]), self.game_list))
+
+
 
 
 if __name__ == '__main__':
