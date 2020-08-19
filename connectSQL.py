@@ -9,7 +9,7 @@ import mysql.connector as mydb
 class MysqlConnector:
     def __init__(self):
         self.conn = mydb.connect(
-            host='172.28.193.227',
+            host='172.28.64.209',
             port='3306',
             user='player',
             password='AS24dg',
@@ -19,12 +19,12 @@ class MysqlConnector:
         print(self.conn.is_connected())
 
     def get_recommend(self, play_data):
-        play_data = numpy.asarray(list(chain(*play_data)))
+        play_data = numpy.asarray(list(chain(*play_data)), dtype='float32')
         cur = self.conn.cursor()
         cur.execute("SELECT * FROM play_data")
         data = cur.fetchall()
         user_numbers = dict([(x[0], i) for i, x in enumerate(data)])
-        other_data = numpy.asarray([x[1:] for x in data])
+        other_data = numpy.asarray([x[1:] for x in data], dtype='float32')
         max_value = numpy.max(other_data, axis=0)
         max_value[max_value == 0] = 1
         other_data = other_data / max_value
@@ -57,8 +57,9 @@ class MysqlConnector:
 
 if __name__ == '__main__':
     db = MysqlConnector()
-    play_data = [list(range(6)), list(range(7))]
+    play_data = [list(range(6)), list(range(8))]
     favorite_data = [["Minecraft", 2], ["Fortnite", -1]]
     # db.insert_play_data(play_data, favorite_data)
-    db.get_recommend(play_data)
+    r = db.get_recommend(play_data)
     # db.end()
+    print()

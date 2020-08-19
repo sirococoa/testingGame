@@ -3,6 +3,7 @@
 import tkinter as tk
 import subprocess
 import functools
+from heapq import heappush, heappop
 
 from connectSQL import MysqlConnector
 
@@ -15,6 +16,7 @@ class RecommendSystem(tk.Tk):
         self.db = MysqlConnector()
         self.play_flag = [False for _ in range(GamePlayFrame.GAME_NUM)]
         self.play_data = [[] for _ in range(GamePlayFrame.GAME_NUM)]
+        self.play_data = [list(range(6)), list(range(8))]
         self.use_frame = GamePlayFrame(self)
 
     def switch_frame(self, new_frame_class):
@@ -96,9 +98,9 @@ class GamePlayFrame(tk.Frame):
         cp = subprocess.run(['python', self.GAMES[self.select_game_num] + '.py'], encoding='utf-8', stdout=subprocess.PIPE)
         output = cp.stdout.rstrip('\n').split('\n')
         print('end ' + self.GAMES[self.select_game_num])
-        if output:
+        if output[0]:
             self.master.play_flag[self.select_game_num] = True
-            self.master.play_data[self.select_game_num] = output
+            self.master.play_data[self.select_game_num] = list(map(int, output))
 
     def next(self, event):
         self.master.switch_frame(RecommendFrame)
@@ -109,6 +111,8 @@ class GamePlayFrame(tk.Frame):
 
 
 class RecommendFrame(tk.Frame):
+    RECOMMEND_GAME_NUM = 10
+
     def __init__(self, master):
         super().__init__(master)
         self.master = master
@@ -118,6 +122,11 @@ class RecommendFrame(tk.Frame):
     def widgets(self):
         message = tk.Label(self, text=u'Recommend you game')
         message.pack(side='top')
+
+        recommend_game = self.master.db.get_recommend(self.master.play_data)
+        for i in range(self.RECOMMEND_GAME_NUM):
+            point, game = heappop(recommend_game)
+            tk.Label(self, text="{}. {} ({:.2f})".format(i+1, game, -point)).pack()
 
         next_button = tk.Button(self, text="Next")
         next_button.bind('<Button-1>', self.next)
@@ -173,8 +182,6 @@ class RegisterFrame(tk.Frame):
 
     def send_favorite_game(self, event):
         self.master.db.insert_play_data(self.master.play_data, map(lambda x: (x[0], self.EVALUATE_POINT[x[1]]), self.game_list))
-
-
 
 
 if __name__ == '__main__':
