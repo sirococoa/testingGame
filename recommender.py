@@ -137,8 +137,8 @@ class RecommendFrame(tk.Frame):
 
 
 class RegisterFrame(tk.Frame):
-    CHECK_BOX_NAME = ["好き", "少し好き", "少し嫌い", "嫌い"]
-    EVALUATE_POINT = [2, 1, -1, -2]
+    CHECK_BOX_NAME = ["5(好き)", "4", "3", "2", "1(嫌い)"]
+    EVALUATE_POINT = [5, 4, 3, 2, 1]
 
     def __init__(self, master):
         super().__init__(master)
