@@ -1,0 +1,11 @@
+0,Minecraft,5
+0,Apex,5
+0,Rimworld,5
+0,Undertale,5
+0,Fortnite,2
+0,ドラゴンクエストIX　星空の守り人,2
+0,あつまれ　どうぶつの森,3
+0,ポケットモンスター　ソード・シールド,3
+0,リズム天国ゴールド,4
+0,Unrailed!,4
+0,Terraria,4

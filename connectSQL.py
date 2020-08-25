@@ -7,9 +7,9 @@ import mysql.connector as mydb
 
 
 class MysqlConnector:
-    def __init__(self):
+    def __init__(self, ip):
         self.conn = mydb.connect(
-            host='172.28.64.209',
+            host=ip,
             port='3306',
             user='player',
             password='AS24dg',
@@ -53,6 +53,9 @@ class MysqlConnector:
 
     def end(self):
         self.conn.close()
+
+    def connect(self):
+        return self.conn.is_connected()
 
 
 if __name__ == '__main__':

@@ -6,6 +6,7 @@ import functools
 from heapq import heappush, heappop
 
 from connectSQL import MysqlConnector
+from connectFile import FileConnector
 
 
 class RecommendSystem(tk.Tk):
@@ -13,17 +14,62 @@ class RecommendSystem(tk.Tk):
         super().__init__()
         self.title("Game Recommend System")
         self.geometry("500x500")
-        self.db = MysqlConnector()
+        self.db = None
         self.play_flag = [False for _ in range(GamePlayFrame.GAME_NUM)]
         self.play_data = [[] for _ in range(GamePlayFrame.GAME_NUM)]
         self.play_data = [list(range(6)), list(range(8))]
-        self.use_frame = GamePlayFrame(self)
+        self.use_frame = ConnectFrame(self)
 
     def switch_frame(self, new_frame_class):
         new_frame = new_frame_class(self)
         if self.use_frame is not None:
             self.use_frame.destroy()
         self.use_frame = new_frame
+
+
+class ConnectFrame(tk.Frame):
+    def __init__(self, master=None):
+        super().__init__(master)
+        self.master = master
+        self.pack()
+        self.ip_box = None
+        self.access_info = tk.StringVar()
+        self.widgets()
+
+    def widgets(self):
+        message = tk.Label(self, text=u"CHOSE DATA BASE")
+        message.grid(row=0, column=1, padx=10, pady=10)
+
+        message = tk.Label(self, text=u"ip address")
+        message.grid(row=1, column=0, padx=10, pady=10)
+        self.ip_box = tk.Entry(self)
+        self.ip_box.grid(row=1, column=1, padx=10, pady=10)
+        tmp = tk.Button(self, text="Connect")
+        tmp.bind('<Button-1>', self.connect_sql)
+        tmp.grid(row=1, column=2, padx=10, pady=10)
+
+        tmp = tk.Button(self, text="File")
+        tmp.bind('<Button-1>', self.connect_file)
+        tmp.grid(row=2, column=2, padx=10, pady=10)
+
+        self.access_info.set("")
+        info_message = tk.Label(self, textvariable=self.access_info)
+        info_message.grid(row=3, column=0, columnspan=3, padx=10, pady=10)
+
+    def connect_sql(self, event):
+        self.access_info.set("Connecting Data Base ... ")
+        self.master.update_idletasks()
+        try:
+            self.master.db = MysqlConnector(self.ip_box.get())
+        except Exception:
+            self.access_info.set("Can't connect Data Base.\nUse local File.")
+        else:
+            if self.master.db.connect():
+                self.master.switch_frame(GamePlayFrame)
+
+    def connect_file(self, event):
+        self.master.db = FileConnector()
+        self.master.switch_frame(GamePlayFrame)
 
 
 class GamePlayFrame(tk.Frame):
@@ -37,7 +83,8 @@ class GamePlayFrame(tk.Frame):
         [D] or -> : 右に移動
         [Space]   : 弾を発射
         ルール
-        隕石に衝突すると残機が1減り、0になった後、さらに隕石と衝突するとゲームオーバーです。
+        隕石に衝突すると残機が1減り、0になった後、
+        さらに隕石と衝突するとゲームオーバーです。
         一定時間生存したらクリアです。
         隕石を弾で撃ち落とすか、避けるかして生存を目指しましょう。
         """,
@@ -66,28 +113,25 @@ class GamePlayFrame(tk.Frame):
 
     def widgets(self):
         message = tk.Label(self, text=u'PLAY THESE GAME!')
-        message.pack(side='top')
+        message.grid(row=0, column=1, columnspan=2, padx=10, pady=10)
 
-        button = []
         for i, name in enumerate(self.GAMES):
             tmp = tk.Button(self, text=name)
             tmp.bind('<Button-1>', functools.partial(self.select_game, number=i))
-            button.append(tmp)
-        for b in button:
-            b.pack()
+            tmp.grid(row=i + 1, column=0, padx=10, pady=10)
 
         self.game_info = tk.StringVar()
         self.game_info.set(self.GAME_INFO[0])
-        game_info_message = tk.Label(self, textvariable=self.game_info)
-        game_info_message.pack()
+        game_info_message = tk.Label(self, textvariable=self.game_info, justify='left')
+        game_info_message.grid(row=1, rowspan=self.GAME_NUM, column=1, columnspan=3, padx=10, pady=10)
 
         next_button = tk.Button(self, text="Next")
         next_button.bind('<Button-1>', self.next)
-        next_button.pack(side='bottom')
+        next_button.grid(row=self.GAME_NUM+2, column=3, padx=10, pady=10)
 
         play_button = tk.Button(self, text="Play")
         play_button.bind('<Button-1>', self.run_game)
-        play_button.pack(anchor='se')
+        play_button.grid(row=self.GAME_NUM+2, column=0, padx=10, pady=10)
 
     def select_game(self, event, number):
         self.select_game_num = number
