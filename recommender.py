@@ -147,11 +147,11 @@ class GamePlayFrame(tk.Frame):
             self.master.play_data[self.select_game_num] = list(map(int, output))
 
     def next(self, event):
-        self.master.switch_frame(RecommendFrame)
-        # if all(self.play_flag):
-        #     self.master.switch_frame(RecommendFrame)
-        # else:
-        #     pass
+        # self.master.switch_frame(RecommendFrame)
+        if all(self.master.play_flag):
+            self.master.switch_frame(RecommendFrame)
+        else:
+            pass
 
 
 class RecommendFrame(tk.Frame):
